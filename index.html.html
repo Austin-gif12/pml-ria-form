@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PML RIA Form">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<title>PML Fire Protection — RIA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --ff:'DM Sans','Segoe UI',Tahoma,sans-serif;
+    --ffm:'DM Mono','Courier New',monospace;
+    --red:#C0392B;--red2:#E74C3C;
+    --dark:#1a1a1a;--mid:#2d2d2d;
+    --card:#fff;--bg:#f0f2f5;
+    --border:#d0d5dd;--muted:#6b7280;
+    --accent:#1e40af;--accent2:#dbeafe;
+    --green:#166534;--gbg:#dcfce7;
+    --warn:#92400e;--wbg:#fef3c7;
+    --radius:10px;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--ff);background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:calc(60px + var(--safe-bottom))}
+
+  /* ── TOP BAR ── */
+  .topbar{background:var(--dark);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3);padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .logo-badge{background:var(--red);color:#fff;font-weight:700;font-size:14px;padding:6px 12px;border-radius:6px;letter-spacing:.5px;white-space:nowrap}
+  .topbar-title{color:#fff;font-size:14px;font-weight:500}
+  .topbar-title span{color:#aaa;font-weight:300}
+  .topbar-actions{display:flex;gap:8px;flex-shrink:0}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:none;border-radius:8px;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:44px}
+  .btn-ghost{background:transparent;color:#ccc;border:1px solid #444}
+  .btn-ghost:hover,.btn-ghost:active{background:#333;color:#fff}
+  .btn-blue{background:var(--accent);color:#fff}
+  .btn-blue:hover,.btn-blue:active{background:#1e3a8a}
+  .btn-green{background:#15803d;color:#fff}
+  .btn-green:hover,.btn-green:active{background:#166534}
+  .btn-sm{padding:6px 12px;font-size:12px;min-height:36px}
+
+  .main{max-width:1180px;margin:0 auto;padding:24px 16px}
+
+  /* ── STATUS ── */
+  .status-bar{background:var(--gbg);border:1px solid #bbf7d0;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:13px;color:var(--green);font-weight:500}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ── IPHONE BANNER ── */
+  .iphone-banner{background:#1e3a5f;border:1px solid #2563eb;border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+  .iphone-banner .ib-icon{font-size:26px;flex-shrink:0;margin-top:2px}
+  .iphone-banner .ib-text{color:#e0eeff;font-size:13px;line-height:1.6}
+  .iphone-banner .ib-text strong{color:#fff;display:block;margin-bottom:4px;font-size:13.5px}
+  .iphone-banner .ib-close{background:none;border:none;color:#93c5fd;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+
+  /* ── CARDS ── */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+  .card-header{background:var(--mid);color:#fff;padding:13px 18px;display:flex;align-items:center;justify-content:space-between}
+  .card-header h2{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card-header .tag{background:rgba(255,255,255,.15);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:400}
+  .card-body{padding:18px}
+
+  /* ── FORM ── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .field label .req{color:var(--red)}
+  input[type=text],input[type=date],select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--ff);font-size:16px;/* 16px prevents iOS zoom */color:var(--dark);background:#fff;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,64,175,.12)}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;cursor:pointer}
+  textarea{resize:vertical;min-height:72px;font-size:15px}
+  input[readonly]{background:#f8fafc;color:var(--muted)}
+  .declaration{background:#fafafa;border:1px solid var(--border);border-radius:7px;padding:14px 16px;font-size:13px;color:#555;line-height:1.6;margin-bottom:14px}
+
+  /* ── DOOR TABLE ── */
+  .door-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border)}
+  .door-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:960px}
+  .door-table th{background:#f1f5f9;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 7px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+  .door-table td{padding:6px 5px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+  .door-table tr:last-child td{border-bottom:none}
+  .door-table tr:hover td{background:#fafcff}
+  .door-table select,.door-table input[type=text],.door-table input[type=date]{padding:7px 8px;font-size:13px;border-radius:6px;min-width:80px}
+  .door-table select{padding-right:24px}
+  .door-ref{font-family:var(--ffm);font-weight:700;color:var(--accent)}
+  .row-num{width:26px;height:26px;background:var(--accent2);color:var(--accent);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .table-actions{padding:12px 0 0;display:flex;gap:10px;align-items:center}
+  .remove-row{background:none;border:none;cursor:pointer;color:#dc2626;font-size:18px;padding:4px 7px;border-radius:4px;-webkit-tap-highlight-color:transparent;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+  .remove-row:hover,.remove-row:active{background:#fee2e2}
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider{display:flex;align-items:center;gap:14px;margin:22px 0 14px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* ── PHOTO SECTION ── */
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .photo-card{border:1.5px solid var(--border);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .photo-card-header{background:var(--mid);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+  .photo-card-title{color:#fff;font-size:13px;font-weight:600}
+  .photo-ref-badge{font-family:var(--ffm);font-size:11px;background:rgba(255,255,255,.18);color:#fff;padding:2px 8px;border-radius:4px}
+  .photo-slots{padding:10px;display:flex;flex-direction:column;gap:10px}
+  .photo-slot{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fafafa}
+  .photo-slot-hdr{background:#f1f5f9;padding:7px 11px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+
+  /* ADD PHOTO BUTTON */
+  .add-photo-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 0;border:none;border-radius:0;font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--accent2);color:var(--accent);border-top:1.5px dashed #93c5fd;-webkit-tap-highlight-color:transparent;min-height:48px}
+  .add-photo-btn:hover,.add-photo-btn:active{background:#bfdbfe}
+  .cam-icon{font-size:20px}
+
+  /* PICKER */
+  .photo-picker{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);animation:slideDown .18s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .photo-picker.open{display:flex}
+  .picker-option{display:flex;align-items:center;gap:13px;padding:15px 14px;border:none;background:#fff;font-family:var(--ff);font-size:14px;font-weight:500;cursor:pointer;color:var(--dark);transition:background .12s;border-bottom:1px solid #f1f5f9;text-align:left;width:100%;-webkit-tap-highlight-color:transparent;min-height:64px}
+  .picker-option:hover,.picker-option:active{background:#f0f7ff}
+  .picker-option:last-of-type{border-bottom:none}
+  .picker-option .p-icon{font-size:28px;flex-shrink:0}
+  .picker-option .p-text{display:flex;flex-direction:column}
+  .picker-option .p-title{font-size:14px;font-weight:600}
+  .picker-option .p-sub{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+  .picker-cancel-row{padding:8px 14px;text-align:right;border-top:1px solid #f1f5f9;background:#fafafa}
+  .picker-cancel-row button{background:none;border:none;font-family:var(--ff);font-size:13px;color:var(--muted);cursor:pointer;padding:6px 10px;border-radius:4px;-webkit-tap-highlight-color:transparent;min-height:36px}
+
+  /* THUMBNAILS */
+  .photo-thumbs{display:flex;flex-wrap:wrap;gap:7px;padding:8px 10px 6px}
+  .photo-thumb-wrap{position:relative}
+  .photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;border:2px solid var(--border);display:block;cursor:pointer;transition:transform .1s}
+  .photo-thumb:hover,.photo-thumb:active{transform:scale(1.06);border-color:var(--accent)}
+  .thumb-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#dc2626;color:#fff;border:2px solid #fff;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;-webkit-tap-highlight-color:transparent}
+  .photo-count{font-size:11px;color:var(--muted);padding:0 10px 8px}
+
+  /* LIGHTBOX */
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:94vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.6)}
+  .lb-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:20px;color:#fff;font-size:32px;cursor:pointer;background:rgba(0,0,0,.5);border:none;line-height:1;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+
+  /* SAVED LIST */
+  .saved-list{display:flex;flex-direction:column;gap:8px}
+  .saved-item{background:#f8fafc;border:1px solid var(--border);border-radius:7px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;flex-wrap:wrap}
+  .saved-item-info strong{font-size:13px}
+  .saved-item-info span{color:var(--muted);font-size:11px;margin-left:6px}
+  .saved-item-actions{display:flex;gap:6px;flex-shrink:0}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:calc(24px + var(--safe-bottom));right:16px;left:16px;background:var(--dark);color:#fff;padding:13px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 24px rgba(0,0,0,.3);transform:translateY(120px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:9998;display:flex;align-items:center;gap:8px;text-align:center;justify-content:center}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-left:4px solid #22c55e}
+  .toast.error{border-left:4px solid var(--red)}
+
+  /* ═══════════════════════════════════════════════
+     PRINT STYLES — A4 Landscape, full table visible
+  ═══════════════════════════════════════════════ */
+  @media print{
+    @page{size:A4 landscape;margin:8mm 10mm}
+
+    .topbar,.topbar-actions,.table-actions,.remove-row,.btn,
+    .status-bar,.section-divider,#savedSection,.iphone-banner,
+    .add-photo-btn,.photo-picker,.thumb-del,.lightbox,
+    .picker-cancel-row{display:none!important}
+
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    body{background:#fff!important;padding:0!important;font-size:9pt}
+    .main{padding:0!important;max-width:100%!important}
+    .card{box-shadow:none!important;border:1px solid #999!important;margin-bottom:6mm!important;page-break-inside:avoid;border-radius:0!important}
+    .card-header{background:#333!important;padding:6px 10px!important}
+    .card-header h2{font-size:10pt!important}
+    .card-body{padding:8px 10px!important}
+
+    /* Header form fields — show as plain text */
+    .form-grid{gap:6px!important}
+    .field input,.field select,.field textarea{
+      border:none!important;padding:0!important;font-size:9pt!important;
+      background:transparent!important;box-shadow:none!important;
+      height:auto!important;min-height:0!important
+    }
+    .field label{font-size:7pt!important;margin-bottom:1px!important}
+    .declaration{font-size:8pt!important;padding:6px 8px!important}
+
+    /* DOOR TABLE — this is the key fix */
+    .door-table-wrap{overflow:visible!important;border:none!important;border-radius:0!important}
+    .door-table{
+      min-width:0!important;
+      width:100%!important;
+      table-layout:fixed!important;
+      font-size:7.5pt!important;
+      border-collapse:collapse!important
+    }
+    .door-table th{
+      font-size:6.5pt!important;
+      padding:4px 3px!important;
+      background:#eee!important;
+      border:1px solid #aaa!important;
+      white-space:normal!important;
+      line-height:1.2!important
+    }
+    .door-table td{
+      padding:3px!important;
+      border:1px solid #ccc!important;
+      vertical-align:top!important;
+      word-break:break-word!important;
+      line-height:1.3!important
+    }
+    /* Column widths for landscape A4 — totals ~270mm */
+    .door-table th:nth-child(1),.door-table td:nth-child(1){width:18px!important}
+    .door-table th:nth-child(2),.door-table td:nth-child(2){width:52px!important}  /* ref */
+    .door-table th:nth-child(3),.door-table td:nth-child(3){width:22mm!important}  /* location */
+    .door-table th:nth-child(4),.door-table td:nth-child(4){width:14mm!important}  /* FP */
+    .door-table th:nth-child(5),.door-table td:nth-child(5){width:18mm!important}  /* date */
+    .door-table th:nth-child(6),.door-table td:nth-child(6){width:12mm!important}  /* initials */
+    .door-table th:nth-child(7),.door-table td:nth-child(7){width:18mm!important}  /* mfr plug */
+    .door-table th:nth-child(8),.door-table td:nth-child(8){width:18mm!important}  /* inst plug */
+    .door-table th:nth-child(9),.door-table td:nth-child(9){width:24mm!important}  /* door doc */
+    .door-table th:nth-child(10),.door-table td:nth-child(10){width:24mm!important} /* fs doc */
+    .door-table th:nth-child(11),.door-table td:nth-child(11){width:auto!important}  /* comments */
+
+    /* Print values are injected by JS — hide the input/select widgets */
+    .door-table td select,
+    .door-table td input,
+    .door-table td textarea{display:none!important}
+    .print-val{display:block!important;font-size:7.5pt!important;color:#111!important}
+
+    /* PHOTOS */
+    .photo-grid{display:block!important}
+    .photo-card{page-break-inside:avoid;margin-bottom:4mm!important;border-radius:0!important}
+    .photo-slot{border-radius:0!important}
+    .photo-thumbs{flex-wrap:wrap!important}
+    .photo-thumb{width:60px!important;height:60px!important}
+  }
+
+  /* ── MOBILE ── */
+  @media(max-width:600px){
+    .form-grid{grid-template-columns:1fr}
+    .topbar{padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+    .topbar-title{display:none}
+    .main{padding:14px 10px}
+    .photo-grid{grid-template-columns:1fr}
+    .card-body{padding:14px}
+    .btn{padding:9px 10px;font-size:12px}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo-badge">PML FP</span>
+    <span class="topbar-title">Q-Mark Fire Door Installation Scheme <span>/ Record of Installation Activities</span></span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="newRecord()">＋ New</button>
+    <button class="btn btn-blue" onclick="saveRecord()">💾 Save</button>
+    <button class="btn btn-green" onclick="window.print()">🖨 Print</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span id="statusText">Works fully offline — all data &amp; photos saved automatically on this device</span>
+  </div>
+
+  <!-- IPHONE INSTRUCTIONS BANNER -->
+  <div class="iphone-banner" id="iphoneBanner">
+    <div class="ib-icon">📱</div>
+    <div class="ib-text">
+      <strong>Using on iPhone? Here's how:</strong>
+      1. Open this file in <strong>Safari</strong> (not Chrome or another browser).<br>
+      2. Tap the <strong>Share button</strong> (the box with an arrow) at the bottom of the screen.<br>
+      3. Scroll down and tap <strong>"Add to Home Screen"</strong> — this saves the app icon to your iPhone home screen for easy access every time, works completely offline.<br>
+      4. If you received this file by email or AirDrop, tap <strong>"Open in Safari"</strong> when prompted.
+    </div>
+    <button class="ib-close" onclick="dismissBanner()" title="Dismiss">✕</button>
+  </div>
+
+  <!-- JOB DETAILS -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🏢 Job &amp; Company Details <span class="tag">Q-MARK FIRE DOOR INSTALLATION SCHEME</span></h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>RIA Register Reference Number <span class="req">*</span></label>
+          <input type="text" id="riaRef" placeholder="e.g. RIA-2024-001" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Internal Installation Project Reference</label>
+          <input type="text" id="projRef" placeholder="e.g. PML-2024-052" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Certified Company Name</label>
+          <input type="text" id="companyName" value="Planning Manager LTD (PML Fire Protection)" readonly>
+        </div>
+        <div class="field">
+          <label>Company Certificate Number</label>
+          <input type="text" id="certNum" value="4322" readonly>
+        </div>
+        <div class="field">
+          <label>Approved Person's Name <span class="req">*</span></label>
+          <select id="approvedPerson">
+            <option value="">— Select Approved Person —</option>
+            <option>Paul Bennet</option>
+            <option>Austin Leivers</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Approved Person's Q-Mark Number</label>
+          <input type="text" id="approvedNum" placeholder="e.g. AP-XXXX" autocomplete="off">
+        </div>
+        <div class="field full">
+          <label>Client Name &amp; Site Address <span class="req">*</span></label>
+          <textarea id="siteAddress" rows="2" placeholder="Client name, building name, street, town, postcode"></textarea>
+        </div>
+      </div>
+      <div class="section-divider">Declaration</div>
+      <div class="declaration">
+        I declare by signing that the work undertaken fully complies with the requirements of the Q-Mark Fire Door Installation scheme and that the work undertaken complies with any local regulations in force at the specific project site location that do not conflict with scheme requirements.
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Signature (print name)</label>
+          <input type="text" id="sigName" placeholder="Full name as signature">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="sigDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOOR TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🚪 Fire Door Installation Entries</h2>
+      <button class="btn btn-ghost btn-sm" onclick="addDoorRow()">＋ Add Door</button>
+    </div>
+    <div class="card-body">
+      <div class="door-table-wrap">
+        <table class="door-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fire Door Ref</th>
+              <th>Location</th>
+              <th>Fire Resistance</th>
+              <th>Completion Date</th>
+              <th>Installed By</th>
+              <th>Q-Mark Mfr Plug</th>
+              <th>Installer Plug / Label</th>
+              <th>Door Supporting Doc</th>
+              <th>Fire Stop Doc</th>
+              <th>Comments</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="doorBody"></tbody>
+        </table>
+      </div>
+      <div class="table-actions">
+        <button class="btn btn-ghost btn-sm" onclick="addDoorRow()">＋ Add another door</button>
+        <span style="font-size:11px;color:var(--muted)">Changes save automatically</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTOGRAPHS -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📷 Photograph Records</h2>
+      <span class="tag">Tap button to take or upload photos</span>
+    </div>
+    <div class="card-body">
+      <div style="background:var(--wbg);border:1px solid #fde68a;border-radius:7px;padding:10px 14px;font-size:13px;color:var(--warn);margin-bottom:16px;">
+        ⚠️ Tap <strong>📷 Add Photo</strong> on any slot — choose <em>Take Photo Now</em> to use your camera, or <em>Upload from Files</em> to pick from your device. Tap any thumbnail to view full size.
+      </div>
+      <div class="photo-grid" id="photoGrid">
+        <div style="color:var(--muted);font-size:13px;padding:20px;">Add door entries above to generate photo slots.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVED RECORDS -->
+  <div id="savedSection" class="card">
+    <div class="card-header"><h2>📁 Saved Records on This Device</h2></div>
+    <div class="card-body">
+      <div class="saved-list" id="savedList">
+        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No saved records yet. Press 💾 Save to save this record.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Photo">
+</div>
+
+<!-- HIDDEN FILE INPUTS -->
+<input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFiles(this)">
+<input type="file" id="galleryInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this)">
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── OPTIONS ──────────────────────────────────────────────────────────────────
+const LOCS=['— Select —','Front Entrance','Rear Entrance','Side Entrance','Stairwell - Ground Floor','Stairwell - 1st Floor','Stairwell - 2nd Floor','Stairwell - 3rd Floor','Stairwell - Basement','Corridor - Ground Floor','Corridor - 1st Floor','Corridor - 2nd Floor','Corridor - 3rd Floor','Plant Room','Electrical Room','Boiler Room','Lift Lobby - Ground Floor','Lift Lobby - 1st Floor','Lift Lobby - 2nd Floor','Lobby / Entrance Hall','Flat Entrance - Flat 1','Flat Entrance - Flat 2','Flat Entrance - Flat 3','Flat Entrance - Flat 4','Flat Entrance - Flat 5','Flat Entrance - Flat 6','Flat Entrance - Flat 7','Flat Entrance - Flat 8','Flat Entrance - Flat 9','Flat Entrance - Flat 10','Kitchen','Bedroom','Living Room','Office','Store Room','Refuse Room','Communal Area','Escape Route','Other (see comments)'];
+const FPS=['— Select —','FD30','FD30S','FD60','FD60S','FD90','FD90S','FD120','FD120S','E30 (EN)','E60 (EN)','EW30 (EN)','EW60 (EN)','EI30 (EN)','EI60 (EN)'];
+const PLUGC=['— Select —','None / Not Present','White','Black','Red','Blue','Yellow','Green','Orange','Purple','Brown','Grey','White & Blue','White & Red','White & Black','White & Yellow','White & Green','Red & Blue','Other (see comments)'];
+const PLUGI=['— Select —','PML Label Applied','PML Plug Fitted','PML Plug + Label','Certification Sticker','Q-Mark Label','None Applied','Other (see comments)'];
+const DDOC=['— Select —','Manufacturer Cert / Data Sheet','BM TRADA Q-Mark Certificate','Fire Test Report','Global Assessment Report','Field of Application (EXAP)','Third Party Cert (Exova)','Third Party Cert (IFCC)','Manufacturer Installation Instructions','Project Specification','Engineers Report','N/A','Other (see comments)'];
+const FSDOC=['— Select —','Manufacturer Installation Instructions','BS 8214:2016 Compliant','BS 8214:2026 Compliant','Intumescent Mastic Cert','Mineral Wool Cert','PU Foam Fire Rating Cert','Fire Stopping Inspection Record','Project Specification','N/A','Other (see comments)'];
+const INITS=['— —','PB','AL','Other'];
+const PHOTO_SLOTS=[{key:'before',label:'📸 Before Installation'},{key:'during',label:'📸 During / After Installation'},{key:'extra',label:'📸 Additional Details'}];
+
+const photoStore={};
+let activeSlotKey=null;
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function mkSel(opts){
+  const s=document.createElement('select');
+  opts.forEach(o=>{const op=document.createElement('option');op.value=op.textContent=o;s.appendChild(op);});
+  s.addEventListener('change',()=>{autoSave();syncPhotoGrid();});
+  return s;
+}
+function mkInp(ph,type='text'){
+  const i=document.createElement('input');
+  i.type=type;i.placeholder=ph;i.autocomplete='off';
+  i.addEventListener('input',()=>{autoSave();syncPhotoGrid();});
+  return i;
+}
+
+// ─── PRINT HELPERS ────────────────────────────────────────────────────────────
+// Before print: inject .print-val spans with the selected/typed values into each td
+function preparePrint(){
+  document.querySelectorAll('#doorBody tr').forEach(tr=>{
+    const sels=[...tr.querySelectorAll('select')];
+    const inps=[...tr.querySelectorAll('input[type=text]')];
+    const dates=[...tr.querySelectorAll('input[type=date]')];
+    const tas=[...tr.querySelectorAll('textarea')];
+    const num=tr.querySelector('.row-num')?.textContent||'';
+    const ref=inps[0]?.value||'';
+    const loc=(sels[0]?.value||'')+(inps[1]?.value?'\n'+inps[1].value:'');
+    const fp=sels[1]?.value||'';
+    const date=dates[0]?.value||'';
+    const init=(sels[2]?.value||'')+(inps[2]?.value?' / '+inps[2].value:'');
+    const plugMfr=sels[3]?.value||'';
+    const plugInst=sels[4]?.value||'';
+    const doorDoc=sels[5]?.value||'';
+    const fsDoc=sels[6]?.value||'';
+    const comments=tas[0]?.value||'';
+    const vals=[num,ref,loc,fp,date,init,plugMfr,plugInst,doorDoc,fsDoc,comments];
+    tr.querySelectorAll('td').forEach((td,i)=>{
+      if(i<vals.length){
+        const pv=document.createElement('span');
+        pv.className='print-val';
+        pv.style.display='none'; // CSS @media print will show these
+        pv.textContent=vals[i]||'—';
+        td.appendChild(pv);
+      }
+    });
+  });
+}
+
+// After print: remove the injected spans
+function cleanupPrint(){
+  document.querySelectorAll('.print-val').forEach(el=>el.remove());
+}
+
+window.addEventListener('beforeprint',preparePrint);
+window.addEventListener('afterprint',cleanupPrint);
+
+// ─── DOOR ROWS ─────────────────────────────────────────────────────────────────
+let rowCount=0;
+function addDoorRow(d){
+  rowCount++;
+  const tb=document.getElementById('doorBody');
+  const tr=document.createElement('tr');
+
+  const nTd=document.createElement('td');
+  nTd.innerHTML=`<span class="row-num">${tb.rows.length+1}</span>`;
+
+  const rTd=document.createElement('td');
+  const rInp=mkInp('FD-001');rInp.className='door-ref';rInp.style.width='78px';
+  rTd.appendChild(rInp);
+
+  const lTd=document.createElement('td');
+  const lSel=mkSel(LOCS);lSel.style.minWidth='140px';
+  const lInp=mkInp('Or type location');lInp.style.marginTop='4px';lInp.style.fontSize='12px';lInp.style.padding='5px 8px';
+  lTd.appendChild(lSel);lTd.appendChild(lInp);
+
+  const fpTd=document.createElement('td');fpTd.appendChild(mkSel(FPS));
+  const dTd=document.createElement('td');
+  const dInp=mkInp('','date');dTd.appendChild(dInp);
+
+  const iTd=document.createElement('td');
+  const iSel=mkSel(INITS);iSel.style.minWidth='60px';
+  const iInp=mkInp('Initials');iInp.style.marginTop='4px';iInp.style.fontSize='12px';iInp.style.padding='5px 8px';
+  iTd.appendChild(iSel);iTd.appendChild(iInp);
+
+  const pmTd=document.createElement('td');pmTd.appendChild(mkSel(PLUGC));
+  const piTd=document.createElement('td');piTd.appendChild(mkSel(PLUGI));
+  const ddTd=document.createElement('td');ddTd.appendChild(mkSel(DDOC));
+  const fsTd=document.createElement('td');fsTd.appendChild(mkSel(FSDOC));
+
+  const cTd=document.createElement('td');
+  const cTa=document.createElement('textarea');
+  cTa.rows=2;cTa.style.fontSize='12px';cTa.style.minWidth='90px';cTa.placeholder='Notes...';
+  cTa.addEventListener('input',autoSave);
+  cTd.appendChild(cTa);
+
+  const xTd=document.createElement('td');
+  const xBtn=document.createElement('button');
+  xBtn.className='remove-row';xBtn.innerHTML='✕';
+  xBtn.onclick=()=>{tr.remove();renum();autoSave();syncPhotoGrid();};
+  xTd.appendChild(xBtn);
+
+  tr.append(nTd,rTd,lTd,fpTd,dTd,iTd,pmTd,piTd,ddTd,fsTd,cTd,xTd);
+  tb.appendChild(tr);
+
+  if(d){
+    rInp.value=d.ref||'';
+    lSel.value=d.loc||LOCS[0];lInp.value=d.locFree||'';
+    fpTd.querySelector('select').value=d.fp||FPS[0];
+    dInp.value=d.date||'';
+    iSel.value=d.init||INITS[0];iInp.value=d.initFree||'';
+    pmTd.querySelector('select').value=d.plugMfr||PLUGC[0];
+    piTd.querySelector('select').value=d.plugInst||PLUGI[0];
+    ddTd.querySelector('select').value=d.doorDoc||DDOC[0];
+    fsTd.querySelector('select').value=d.fsDoc||FSDOC[0];
+    cTa.value=d.comments||'';
+    if(d.photos)Object.assign(photoStore,d.photos);
+  }
+  syncPhotoGrid();
+}
+function renum(){
+  document.querySelectorAll('#doorBody tr').forEach((tr,i)=>tr.querySelector('.row-num').textContent=i+1);
+}
+
+// ─── PHOTO GRID ───────────────────────────────────────────────────────────────
+function syncPhotoGrid(){
+  const grid=document.getElementById('photoGrid');
+  const rows=[...document.querySelectorAll('#doorBody tr')];
+  grid.innerHTML='';
+  if(!rows.length){grid.innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px;">Add door entries above to generate photo slots.</div>';return;}
+
+  rows.forEach((tr,i)=>{
+    const ref=tr.querySelector('.door-ref').value||`Door-${i+1}`;
+    const card=document.createElement('div');
+    card.className='photo-card';card.dataset.ref=ref;
+
+    const hdr=document.createElement('div');
+    hdr.className='photo-card-header';
+    hdr.innerHTML=`<div class="photo-card-title">Door ${i+1}</div><span class="photo-ref-badge">${ref}</span>`;
+    card.appendChild(hdr);
+
+    const sw=document.createElement('div');sw.className='photo-slots';
+
+    PHOTO_SLOTS.forEach(({key,label})=>{
+      const sk=`${ref}_${key}`;
+      const slot=document.createElement('div');slot.className='photo-slot';
+      const sh=document.createElement('div');sh.className='photo-slot-hdr';sh.textContent=label;
+      slot.appendChild(sh);
+
+      const thumbs=document.createElement('div');thumbs.className='photo-thumbs';thumbs.id=`t_${sk}`;
+      renderThumbs(thumbs,sk);slot.appendChild(thumbs);
+
+      const cnt=document.createElement('div');cnt.className='photo-count';cnt.id=`c_${sk}`;
+      refreshCount(cnt,sk);slot.appendChild(cnt);
+
+      const addBtn=document.createElement('button');
+      addBtn.className='add-photo-btn';
+      addBtn.innerHTML=`<span class="cam-icon">📷</span> Add Photo`;
+
+      const picker=document.createElement('div');picker.className='photo-picker';
+
+      const takeOpt=document.createElement('button');
+      takeOpt.className='picker-option';
+      takeOpt.innerHTML=`<span class="p-icon">📸</span><span class="p-text"><span class="p-title">Take Photo Now</span><span class="p-sub">Opens your camera — snap it on the spot</span></span>`;
+      takeOpt.onclick=()=>{activeSlotKey=sk;document.getElementById('cameraInput').value='';document.getElementById('cameraInput').click();closePickers();};
+
+      const upOpt=document.createElement('button');
+      upOpt.className='picker-option';
+      upOpt.innerHTML=`<span class="p-icon">🖼️</span><span class="p-text"><span class="p-title">Upload from Files</span><span class="p-sub">Choose photos already saved on this device</span></span>`;
+      upOpt.onclick=()=>{activeSlotKey=sk;document.getElementById('galleryInput').value='';document.getElementById('galleryInput').click();closePickers();};
+
+      const cr=document.createElement('div');cr.className='picker-cancel-row';
+      const cb=document.createElement('button');cb.textContent='Cancel';
+      cb.onclick=()=>{picker.classList.remove('open');addBtn.style.display='flex';};
+      cr.appendChild(cb);
+
+      picker.appendChild(takeOpt);picker.appendChild(upOpt);picker.appendChild(cr);
+
+      addBtn.onclick=()=>{
+        closePickers();
+        picker.classList.add('open');
+        addBtn.style.display='none';
+      };
+
+      slot.appendChild(addBtn);slot.appendChild(picker);
+      sw.appendChild(slot);
+    });
+
+    card.appendChild(sw);grid.appendChild(card);
+  });
+}
+
+function closePickers(){
+  document.querySelectorAll('.photo-picker.open').forEach(p=>{
+    p.classList.remove('open');
+    const b=p.parentElement?.querySelector('.add-photo-btn');
+    if(b)b.style.display='flex';
+  });
+}
+
+// ─── FILE HANDLING ────────────────────────────────────────────────────────────
+function handleFiles(input){
+  if(!activeSlotKey||!input.files||!input.files.length)return;
+  const files=[...input.files];
+  let done=0;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=900;let w=img.width,h=img.height;
+        if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        const b64=cv.toDataURL('image/jpeg',0.78);
+        if(!photoStore[activeSlotKey])photoStore[activeSlotKey]=[];
+        photoStore[activeSlotKey].push(b64);
+        const te=document.getElementById(`t_${activeSlotKey}`);
+        const ce=document.getElementById(`c_${activeSlotKey}`);
+        if(te)renderThumbs(te,activeSlotKey);
+        if(ce)refreshCount(ce,activeSlotKey);
+        done++;
+        if(done===files.length){autoSave();showToast(`✓ ${done} photo${done>1?'s':''} added`,'success');}
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderThumbs(container,sk){
+  container.innerHTML='';
+  (photoStore[sk]||[]).forEach((src,idx)=>{
+    const wrap=document.createElement('div');wrap.className='photo-thumb-wrap';
+    const img=document.createElement('img');img.src=src;img.className='photo-thumb';
+    img.onclick=()=>openLightbox(src);
+    const del=document.createElement('button');del.className='thumb-del';del.textContent='✕';
+    del.onclick=e=>{e.stopPropagation();photoStore[sk].splice(idx,1);renderThumbs(container,sk);refreshCount(document.getElementById(`c_${sk}`),sk);autoSave();};
+    wrap.appendChild(img);wrap.appendChild(del);container.appendChild(wrap);
+  });
+}
+function refreshCount(el,sk){if(!el)return;const n=(photoStore[sk]||[]).length;el.textContent=n?`${n} photo${n>1?'s':''} attached`:'';}
+
+function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
+// ─── COLLECT / LOAD ───────────────────────────────────────────────────────────
+function collectData(){
+  const rows=[];
+  document.querySelectorAll('#doorBody tr').forEach(tr=>{
+    const ref=tr.querySelector('.door-ref').value;
+    const photos={};
+    PHOTO_SLOTS.forEach(({key})=>{const sk=`${ref}_${key}`;if((photoStore[sk]||[]).length)photos[sk]=photoStore[sk];});
+    rows.push({
+      ref,
+      loc:      tr.querySelectorAll('select')[0].value,
+      locFree:  tr.querySelectorAll('input[type=text]')[1]?.value||'',
+      fp:       tr.querySelectorAll('select')[1].value,
+      date:     tr.querySelector('input[type=date]').value,
+      init:     tr.querySelectorAll('select')[2].value,
+      initFree: tr.querySelectorAll('input[type=text]')[2]?.value||'',
+      plugMfr:  tr.querySelectorAll('select')[3].value,
+      plugInst: tr.querySelectorAll('select')[4].value,
+      doorDoc:  tr.querySelectorAll('select')[5].value,
+      fsDoc:    tr.querySelectorAll('select')[6].value,
+      comments: tr.querySelector('textarea').value,
+      photos,
+    });
+  });
+  return{
+    riaRef:document.getElementById('riaRef').value,
+    projRef:document.getElementById('projRef').value,
+    approvedPerson:document.getElementById('approvedPerson').value,
+    approvedNum:document.getElementById('approvedNum').value,
+    siteAddress:document.getElementById('siteAddress').value,
+    sigName:document.getElementById('sigName').value,
+    sigDate:document.getElementById('sigDate').value,
+    rows,
+    savedAt:new Date().toISOString(),
+  };
+}
+
+function loadData(d){
+  document.getElementById('riaRef').value=d.riaRef||'';
+  document.getElementById('projRef').value=d.projRef||'';
+  document.getElementById('approvedPerson').value=d.approvedPerson||'';
+  document.getElementById('approvedNum').value=d.approvedNum||'';
+  document.getElementById('siteAddress').value=d.siteAddress||'';
+  document.getElementById('sigName').value=d.sigName||'';
+  document.getElementById('sigDate').value=d.sigDate||'';
+  Object.keys(photoStore).forEach(k=>delete photoStore[k]);
+  document.getElementById('doorBody').innerHTML='';rowCount=0;
+  (d.rows||[]).forEach(r=>addDoorRow(r));
+  setTimeout(()=>{
+    (d.rows||[]).forEach(r=>{
+      PHOTO_SLOTS.forEach(({key})=>{
+        const sk=`${r.ref}_${key}`;
+        const te=document.getElementById(`t_${sk}`);const ce=document.getElementById(`c_${sk}`);
+        if(te)renderThumbs(te,sk);if(ce)refreshCount(ce,sk);
+      });
+    });
+  },80);
+}
+
+// ─── SAVE / LOAD ──────────────────────────────────────────────────────────────
+let ast;
+function autoSave(){
+  clearTimeout(ast);
+  ast=setTimeout(()=>{
+    try{localStorage.setItem('ria_draft',JSON.stringify(collectData()));document.getElementById('statusText').textContent='Auto-saved at '+new Date().toLocaleTimeString();}
+    catch(e){document.getElementById('statusText').textContent='⚠️ Storage nearly full — print this record, then delete old ones';}
+  },700);
+}
+
+function saveRecord(){
+  const d=collectData();
+  const label=d.riaRef||d.projRef||('Record '+new Date().toLocaleDateString());
+  const key='ria_'+Date.now();
+  try{
+    const saved=JSON.parse(localStorage.getItem('ria_records')||'{}');
+    saved[key]={label,data:d};
+    localStorage.setItem('ria_records',JSON.stringify(saved));
+    localStorage.setItem('ria_draft',JSON.stringify(d));
+    showToast('✓ Saved: '+label,'success');renderSaved();
+  }catch(e){showToast('⚠️ Storage full — delete old records or use Print to archive','error');}
+}
+
+function loadRecord(key){
+  const saved=JSON.parse(localStorage.getItem('ria_records')||'{}');
+  if(saved[key]){loadData(saved[key].data);showToast('✓ Loaded: '+saved[key].label,'success');}
+}
+function deleteRecord(key){
+  if(!confirm('Delete this saved record?'))return;
+  const saved=JSON.parse(localStorage.getItem('ria_records')||'{}');
+  delete saved[key];localStorage.setItem('ria_records',JSON.stringify(saved));
+  renderSaved();showToast('Record deleted','error');
+}
+
+function renderSaved(){
+  const c=document.getElementById('savedList');
+  const saved=JSON.parse(localStorage.getItem('ria_records')||'{}');
+  const keys=Object.keys(saved);
+  if(!keys.length){c.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No saved records yet.</div>';return;}
+  c.innerHTML=keys.reverse().map(k=>{
+    const r=saved[k];
+    const dt=new Date(r.data.savedAt).toLocaleString();
+    const pc=(r.data.rows||[]).reduce((a,row)=>a+Object.values(row.photos||{}).reduce((b,p)=>b+(p?.length||0),0),0);
+    return `<div class="saved-item">
+      <div class="saved-item-info"><strong>${r.label}</strong><span>${dt}</span>${pc?`<span>📷 ${pc} photo${pc>1?'s':''}</span>`:''}
+      </div>
+      <div class="saved-item-actions">
+        <button class="btn btn-blue btn-sm" onclick="loadRecord('${k}')">Load</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRecord('${k}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function newRecord(){
+  if(!confirm('Start a new blank record? Unsaved changes will be lost.'))return;
+  ['riaRef','projRef','approvedPerson','approvedNum','siteAddress','sigName','sigDate'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.readOnly)el.value='';});
+  Object.keys(photoStore).forEach(k=>delete photoStore[k]);
+  document.getElementById('doorBody').innerHTML='';rowCount=0;
+  addDoorRow();addDoorRow();addDoorRow();
+  document.getElementById('statusText').textContent='New blank record created';
+}
+
+function dismissBanner(){
+  document.getElementById('iphoneBanner').style.display='none';
+  localStorage.setItem('ria_banner_dismissed','1');
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let tt;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;
+  clearTimeout(tt);tt=setTimeout(()=>t.className='toast',3200);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  // Hide iPhone banner if previously dismissed
+  if(localStorage.getItem('ria_banner_dismissed'))document.getElementById('iphoneBanner').style.display='none';
+
+  const draft=localStorage.getItem('ria_draft');
+  if(draft){
+    try{loadData(JSON.parse(draft));const d=JSON.parse(draft);document.getElementById('statusText').textContent='Draft restored — last saved '+new Date(d.savedAt).toLocaleString();}
+    catch(e){addDoorRow();addDoorRow();addDoorRow();}
+  }else{addDoorRow();addDoorRow();addDoorRow();}
+  renderSaved();
+  ['riaRef','projRef','approvedNum','siteAddress','sigName','sigDate'].forEach(id=>document.getElementById(id)?.addEventListener('input',autoSave));
+  document.getElementById('approvedPerson')?.addEventListener('change',autoSave);
+});
+</script>
+</body>
+</html>
