@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PML RIA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<title>PML Fire Protection — RIA</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .declaration{background:#fafafa;border:1px solid var(--border);border-radius:7px;padding:14px 16px;font-size:13px;color:#555;line-height:1.6;margin-bottom:14px}
+
+  .door-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border)}
+  .door-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:960px}
+  .door-table th{background:#f1f5f9;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 7px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+  .door-table td{padding:6px 5px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+  .door-table tr:last-child td{border-bottom:none}
+  .door-table select,.door-table input[type=text],.door-table input[type=date]{padding:7px 8px;font-size:13px;border-radius:6px;min-width:80px}
+  .door-table select{padding-right:24px}
+  .door-ref{font-family:var(--ffm);font-weight:700;color:var(--accent)}
+  .row-num{width:26px;height:26px;background:var(--accent2);color:var(--accent);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .table-actions{padding:12px 0 0;display:flex;gap:10px;align-items:center}
+  .remove-row{background:none;border:none;cursor:pointer;color:#dc2626;font-size:18px;padding:4px 7px;border-radius:4px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+  .remove-row:hover,.remove-row:active{background:var(--red-bg)}
+  .empty-note{color:var(--muted);font-size:13px;text-align:center;padding:18px}
+
+  .section-divider{display:flex;align-items:center;gap:14px;margin:22px 0 14px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .photo-card{border:1.5px solid var(--border);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .photo-card-header{background:var(--mid);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+  .photo-card-title{color:#fff;font-size:13px;font-weight:600}
+  .photo-ref-badge{font-family:var(--ffm);font-size:11px;background:rgba(255,255,255,.18);color:#fff;padding:2px 8px;border-radius:4px}
+  .photo-slots{padding:10px;display:flex;flex-direction:column;gap:10px}
+  .photo-slot{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fafafa}
+  .photo-slot-hdr{background:#f1f5f9;padding:7px 11px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+  .add-photo-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 0;border:none;border-radius:0;font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;background:var(--accent2);color:var(--accent);border-top:1.5px dashed #93c5fd;min-height:48px}
+  .add-photo-btn:hover,.add-photo-btn:active{background:#bfdbfe}
+  .cam-icon{font-size:20px}
+  .photo-picker{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border)}
+  .photo-picker.open{display:flex}
+  .picker-option{display:flex;align-items:center;gap:13px;padding:15px 14px;border:none;background:#fff;font-family:var(--ff);font-size:14px;font-weight:500;cursor:pointer;color:var(--dark);border-bottom:1px solid #f1f5f9;text-align:left;width:100%;min-height:64px}
+  .picker-option:hover,.picker-option:active{background:#f0f7ff}
+  .picker-option .p-icon{font-size:28px;flex-shrink:0}
+  .picker-option .p-text{display:flex;flex-direction:column}
+  .picker-option .p-title{font-size:14px;font-weight:600}
+  .picker-option .p-sub{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+  .picker-cancel-row{padding:8px 14px;text-align:right;border-top:1px solid #f1f5f9;background:#fafafa}
+  .picker-cancel-row button{background:none;border:none;font-family:var(--ff);font-size:13px;color:var(--muted);cursor:pointer;padding:6px 10px;min-height:36px}
+  .photo-thumbs{display:flex;flex-wrap:wrap;gap:7px;padding:8px 10px 6px}
+  .photo-thumb-wrap{position:relative}
+  .photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;border:2px solid var(--border);display:block;cursor:pointer}
+  .thumb-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#dc2626;color:#fff;border:2px solid #fff;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .photo-count{font-size:11px;color:var(--muted);padding:0 10px 8px}
+
+  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:94vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.6)}
+  .lb-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:20px;color:#fff;font-size:32px;cursor:pointer;background:rgba(0,0,0,.5);border:none;line-height:1;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+  .print-val{display:none}
+
+  @media print{
+    @page{size:A4 landscape;margin:8mm 10mm}
+    .topbar,.table-actions,.remove-row,.btn,.status-bar,.section-divider,
+    .add-photo-btn,.photo-picker,.thumb-del,.lightbox,.picker-cancel-row,.empty-note,.no-print{display:none!important}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    body{background:#fff!important;padding:0!important;font-size:9pt}
+    .main{padding:0!important;max-width:100%!important}
+    .card{box-shadow:none!important;border:1px solid #999!important;margin-bottom:6mm!important;page-break-inside:avoid;border-radius:0!important}
+    .card-header{background:#333!important;padding:6px 10px!important}
+    .card-header h2{font-size:10pt!important}
+    .card-body{padding:8px 10px!important}
+    .form-grid{gap:6px!important}
+    .field input,.field select,.field textarea{border:none!important;padding:0!important;font-size:9pt!important;background:transparent!important;box-shadow:none!important;height:auto!important;min-height:0!important}
+    .field label{font-size:7pt!important;margin-bottom:1px!important}
+    .declaration{font-size:8pt!important;padding:6px 8px!important}
+    .door-table-wrap{overflow:visible!important;border:none!important;border-radius:0!important}
+    .door-table{min-width:0!important;width:100%!important;table-layout:fixed!important;font-size:7.5pt!important;border-collapse:collapse!important}
+    .door-table th{font-size:6.5pt!important;padding:4px 3px!important;background:#eee!important;border:1px solid #aaa!important;white-space:normal!important;line-height:1.2!important}
+    .door-table td{padding:3px!important;border:1px solid #ccc!important;vertical-align:top!important;word-break:break-word!important;line-height:1.3!important}
+    .door-table th:nth-child(1),.door-table td:nth-child(1){width:18px!important}
+    .door-table th:nth-child(2),.door-table td:nth-child(2){width:52px!important}
+    .door-table th:nth-child(3),.door-table td:nth-child(3){width:22mm!important}
+    .door-table th:nth-child(4),.door-table td:nth-child(4){width:14mm!important}
+    .door-table th:nth-child(5),.door-table td:nth-child(5){width:18mm!important}
+    .door-table th:nth-child(6),.door-table td:nth-child(6){width:12mm!important}
+    .door-table th:nth-child(7),.door-table td:nth-child(7){width:18mm!important}
+    .door-table th:nth-child(8),.door-table td:nth-child(8){width:18mm!important}
+    .door-table th:nth-child(9),.door-table td:nth-child(9){width:24mm!important}
+    .door-table th:nth-child(10),.door-table td:nth-child(10){width:24mm!important}
+    .door-table th:nth-child(11),.door-table td:nth-child(11){width:auto!important}
+    .door-table th:nth-child(12),.door-table td:nth-child(12){display:none!important}
+    .door-table td select,.door-table td input,.door-table td textarea{display:none!important}
+    .print-val{display:block!important;font-size:7.5pt!important;color:#111!important}
+    .photo-grid{display:block!important}
+    .photo-card{page-break-inside:avoid;margin-bottom:4mm!important;border-radius:0!important}
+    .photo-slot{border-radius:0!important}
+    .photo-thumbs{flex-wrap:wrap!important}
+    .photo-thumb{width:110px!important;height:110px!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="btn btn-ghost btn-sm" href="jobs.html">← Jobs</a>
+    <span class="logo-badge">PML FP</span>
+    <span class="topbar-title" id="topbarJob">Record of Installation Activities</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-green" id="printBtn">🖨 Print</button>
+    <button class="btn btn-ghost btn-sm" id="signOutBtn">Sign Out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="status-bar online" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText">Connecting…</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>🏢 Job &amp; Company Details <span class="tag">Q-MARK FIRE DOOR INSTALLATION SCHEME</span></h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>RIA Register Reference Number <span class="req">*</span></label>
+          <input type="text" id="riaRef" placeholder="e.g. RIA-2024-001" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Internal Installation Project Reference</label>
+          <input type="text" id="projRef" placeholder="e.g. PML-2024-052" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Certified Company Name</label>
+          <input type="text" value="Planning Manager LTD (PML Fire Protection)" readonly>
+        </div>
+        <div class="field">
+          <label>Company Certificate Number</label>
+          <input type="text" value="4322" readonly>
+        </div>
+        <div class="field">
+          <label>Approved Person's Name <span class="req">*</span></label>
+          <select id="approvedPerson">
+            <option value="">— Select Approved Person —</option>
+            <option>Paul Bennet</option>
+            <option>Austin Leivers</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Approved Person's Q-Mark Number</label>
+          <input type="text" id="approvedNum" placeholder="e.g. AP-XXXX" autocomplete="off">
+        </div>
+        <div class="field full">
+          <label>Client Name &amp; Site Address <span class="req">*</span></label>
+          <textarea id="siteAddress" rows="2" placeholder="Client name, building name, street, town, postcode"></textarea>
+        </div>
+      </div>
+      <div class="section-divider">Declaration</div>
+      <div class="declaration">
+        I declare by signing that the work undertaken fully complies with the requirements of the Q-Mark Fire Door Installation scheme and that the work undertaken complies with any local regulations in force at the specific project site location that do not conflict with scheme requirements.
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Signature (print name)</label>
+          <input type="text" id="sigName" placeholder="Full name as signature">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="sigDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>🚪 Fire Door Installation Entries</h2>
+      <button class="btn btn-ghost btn-sm" id="addDoorTop">＋ Add Door</button>
+    </div>
+    <div class="card-body">
+      <div class="door-table-wrap">
+        <table class="door-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Fire Door Ref</th><th>Location</th><th>Fire Resistance</th>
+              <th>Completion Date</th><th>Installed By</th><th>Q-Mark Mfr Plug</th>
+              <th>Installer Plug / Label</th><th>Door Supporting Doc</th><th>Fire Stop Doc</th>
+              <th>Comments</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="doorBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-note" id="doorEmpty">No doors on this job yet — tap "＋ Add Door".</div>
+      <div class="table-actions">
+        <button class="btn btn-ghost btn-sm" style="color:var(--dark);border-color:var(--border)" id="addDoorBottom">＋ Add another door</button>
+        <span style="font-size:11px;color:var(--muted)">Changes save automatically and sync to everyone on this job</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>📷 Photograph Records</h2>
+      <span class="tag">Tap button to take or upload photos</span>
+    </div>
+    <div class="card-body">
+      <div class="no-print" style="background:var(--wbg);border:1px solid #fde68a;border-radius:7px;padding:10px 14px;font-size:13px;color:var(--warn);margin-bottom:16px;">
+        ⚠️ Tap <strong>📷 Add Photo</strong> on any slot — choose <em>Take Photo Now</em> to use your camera, or <em>Upload from Files</em> to pick from your device. Tap any thumbnail to view full size.
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+      <div class="empty-note" id="photoEmpty">Add door entries above to generate photo slots.</div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <img id="lightboxImg" src="" alt="Photo">
+</div>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="galleryInput" accept="image/*" multiple style="display:none">
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { auth, db } from "./firebase-init.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import {
+  doc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+// ─── OPTIONS ──────────────────────────────────────────────────────────────────
+const LOCS=['— Select —','Front Entrance','Rear Entrance','Side Entrance','Stairwell - Ground Floor','Stairwell - 1st Floor','Stairwell - 2nd Floor','Stairwell - 3rd Floor','Stairwell - Basement','Corridor - Ground Floor','Corridor - 1st Floor','Corridor - 2nd Floor','Corridor - 3rd Floor','Plant Room','Electrical Room','Boiler Room','Lift Lobby - Ground Floor','Lift Lobby - 1st Floor','Lift Lobby - 2nd Floor','Lobby / Entrance Hall','Flat Entrance - Flat 1','Flat Entrance - Flat 2','Flat Entrance - Flat 3','Flat Entrance - Flat 4','Flat Entrance - Flat 5','Flat Entrance - Flat 6','Flat Entrance - Flat 7','Flat Entrance - Flat 8','Flat Entrance - Flat 9','Flat Entrance - Flat 10','Kitchen','Bedroom','Living Room','Office','Store Room','Refuse Room','Communal Area','Escape Route','Other (see comments)'];
+const FPS=['— Select —','FD30','FD30S','FD60','FD60S','FD90','FD90S','FD120','FD120S','E30 (EN)','E60 (EN)','EW30 (EN)','EW60 (EN)','EI30 (EN)','EI60 (EN)'];
+const PLUGC=['— Select —','None / Not Present','White','Black','Red','Blue','Yellow','Green','Orange','Purple','Brown','Grey','White & Blue','White & Red','White & Black','White & Yellow','White & Green','Red & Blue','Other (see comments)'];
+const PLUGI=['— Select —','PML Label Applied','PML Plug Fitted','PML Plug + Label','Certification Sticker','Q-Mark Label','None Applied','Other (see comments)'];
+const DDOC=['— Select —','Manufacturer Cert / Data Sheet','BM TRADA Q-Mark Certificate','Fire Test Report','Global Assessment Report','Field of Application (EXAP)','Third Party Cert (Exova)','Third Party Cert (IFCC)','Manufacturer Installation Instructions','Project Specification','Engineers Report','N/A','Other (see comments)'];
+const FSDOC=['— Select —','Manufacturer Installation Instructions','BS 8214:2016 Compliant','BS 8214:2026 Compliant','Intumescent Mastic Cert','Mineral Wool Cert','PU Foam Fire Rating Cert','Fire Stopping Inspection Record','Project Specification','N/A','Other (see comments)'];
+const INITS=['— —','PB','AL','Other'];
+const PHOTO_SLOTS=[{key:'before',label:'📸 Before Installation'},{key:'during',label:'📸 During / After Installation'},{key:'extra',label:'📸 Additional Details'}];
+const DOOR_DEFAULTS={ref:'',loc:LOCS[0],locFree:'',fp:FPS[0],date:'',init:INITS[0],initFree:'',plugMfr:PLUGC[0],plugInst:PLUGI[0],doorDoc:DDOC[0],fsDoc:FSDOC[0],comments:''};
+const JOB_FIELDS=['riaRef','projRef','approvedPerson','approvedNum','siteAddress','sigName','sigDate'];
+const DEBOUNCE=600;
+
+const jobId=new URLSearchParams(location.search).get('job');
+if(!jobId) location.replace('jobs.html');
+
+const $=id=>document.getElementById(id);
+const tbody=$('doorBody');
+const photoGrid=$('photoGrid');
+
+let tt;
+function showToast(msg,type='success'){
+  const t=$('toast');t.textContent=msg;t.className=`toast ${type} show`;
+  clearTimeout(tt);tt=setTimeout(()=>t.className='toast',3200);
+}
+
+// ─── SYNC STATUS ──────────────────────────────────────────────────────────────
+const pendingSources=new Set();
+function setPending(src,flag){flag?pendingSources.add(src):pendingSources.delete(src);updateStatus();}
+function updateStatus(){
+  const online=navigator.onLine;
+  $('statusBar').className='status-bar '+(online?'online':'offline');
+  $('statusText').textContent=!online
+    ? 'Offline — changes are saved on this device and will sync when you are back online'
+    : pendingSources.size
+      ? 'Online — syncing changes…'
+      : 'Online — all changes synced';
+}
+window.addEventListener('online',updateStatus);
+window.addEventListener('offline',updateStatus);
+updateStatus();
+
+$('signOutBtn').addEventListener('click',()=>signOut(auth));
+$('printBtn').addEventListener('click',()=>window.print());
+
+// ─── JOB HEADER ───────────────────────────────────────────────────────────────
+const jobRef=doc(db,'jobs',jobId);
+const jobPending={};
+let jobTimer;
+
+function flushJob(){
+  const data={...jobPending};
+  if(!Object.keys(data).length)return;
+  for(const k in data)delete jobPending[k];
+  updateDoc(jobRef,{...data,updatedAt:serverTimestamp()}).catch(err=>showToast('Save failed: '+err.message,'error'));
+}
+function queueJobSave(field,val){
+  jobPending[field]=val;
+  clearTimeout(jobTimer);
+  jobTimer=setTimeout(flushJob,DEBOUNCE);
+}
+JOB_FIELDS.forEach(id=>{
+  const el=$(id);
+  const h=()=>queueJobSave(id,el.value);
+  el.addEventListener('input',h);
+  el.addEventListener('change',h);
+});
+
+let touchTimer;
+function touchJob(){
+  clearTimeout(touchTimer);
+  touchTimer=setTimeout(()=>updateDoc(jobRef,{updatedAt:serverTimestamp()}).catch(()=>{}),3000);
+}
+
+// ─── DOORS ────────────────────────────────────────────────────────────────────
+const doorsCol=collection(db,'jobs',jobId,'doors');
+const rows=new Map();
+const photoCards=new Map();
+const doorPending={};
+const doorTimers={};
+
+function flushDoor(id){
+  const data=doorPending[id];
+  if(!data)return;
+  delete doorPending[id];
+  updateDoc(doc(doorsCol,id),{...data,updatedAt:serverTimestamp()}).catch(err=>showToast('Save failed: '+err.message,'error'));
+}
+function queueDoorSave(id,field,val){
+  (doorPending[id]??={})[field]=val;
+  clearTimeout(doorTimers[id]);
+  doorTimers[id]=setTimeout(()=>flushDoor(id),DEBOUNCE);
+  touchJob();
+}
+function flushAll(){
+  flushJob();
+  Object.keys(doorPending).forEach(flushDoor);
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushAll();});
+window.addEventListener('pagehide',flushAll);
+
+function mkSel(opts){
+  const s=document.createElement('select');
+  opts.forEach(o=>{const op=document.createElement('option');op.value=op.textContent=o;s.appendChild(op);});
+  return s;
+}
+function mkInp(ph,type='text'){
+  const i=document.createElement('input');
+  i.type=type;i.placeholder=ph;i.autocomplete='off';
+  return i;
+}
+function cell(...kids){const td=document.createElement('td');td.append(...kids);return td;}
+
+function buildRow(id){
+  const tr=document.createElement('tr');tr.dataset.id=id;
+  const f={};
+  const bind=(field,el)=>{
+    f[field]=el;
+    const h=()=>{queueDoorSave(id,field,el.value);if(field==='ref')updateBadge(id);};
+    el.addEventListener('input',h);
+    el.addEventListener('change',h);
+    return el;
+  };
+  const small=el=>{el.style.marginTop='4px';el.style.fontSize='12px';el.style.padding='5px 8px';return el;};
+
+  const num=document.createElement('span');num.className='row-num';
+  const ref=bind('ref',mkInp('FD-001'));ref.className='door-ref';ref.style.width='78px';
+  const loc=bind('loc',mkSel(LOCS));loc.style.minWidth='140px';
+  const locFree=small(bind('locFree',mkInp('Or type location')));
+  const init=bind('init',mkSel(INITS));init.style.minWidth='60px';
+  const initFree=small(bind('initFree',mkInp('Initials')));
+  const ta=bind('comments',document.createElement('textarea'));
+  ta.rows=2;ta.style.fontSize='12px';ta.style.minWidth='90px';ta.placeholder='Notes...';
+
+  const del=document.createElement('button');
+  del.className='remove-row';del.textContent='✕';del.title='Remove this door';
+  del.addEventListener('click',()=>removeDoor(id));
+
+  tr.append(
+    cell(num),cell(ref),cell(loc,locFree),
+    cell(bind('fp',mkSel(FPS))),cell(bind('date',mkInp('','date'))),
+    cell(init,initFree),
+    cell(bind('plugMfr',mkSel(PLUGC))),cell(bind('plugInst',mkSel(PLUGI))),
+    cell(bind('doorDoc',mkSel(DDOC))),cell(bind('fsDoc',mkSel(FSDOC))),
+    cell(ta),cell(del)
+  );
+  rows.set(id,{tr,f,num});
+  return tr;
+}
+
+function applyDoorData(id,d){
+  const r=rows.get(id);if(!r)return;
+  for(const [field,el] of Object.entries(r.f)){
+    if(doorPending[id]&&field in doorPending[id])continue;
+    if(el===document.activeElement)continue;
+    const v=d[field]??DOOR_DEFAULTS[field];
+    if(el.value!==v)el.value=v;
+  }
+  updateBadge(id);
+}
+
+async function addDoor(){
+  try{
+    await addDoc(doorsCol,{...DOOR_DEFAULTS,order:Date.now(),updatedAt:serverTimestamp()});
+    touchJob();
+  }catch(err){showToast('Could not add door: '+err.message,'error');}
+}
+$('addDoorTop').addEventListener('click',addDoor);
+$('addDoorBottom').addEventListener('click',addDoor);
+
+async function removeDoor(id){
+  if(!confirm('Remove this door and all of its photos? This affects everyone on this job.'))return;
+  clearTimeout(doorTimers[id]);delete doorPending[id];
+  try{
+    const photos=await getDocs(collection(db,'jobs',jobId,'doors',id,'photos'));
+    await Promise.all(photos.docs.map(p=>deleteDoc(p.ref)));
+    await deleteDoc(doc(doorsCol,id));
+    touchJob();
+  }catch(err){showToast('Could not remove door: '+err.message,'error');}
+}
+
+function renumber(){
+  [...tbody.children].forEach((tr,i)=>{
+    rows.get(tr.dataset.id).num.textContent=i+1;
+  });
+  [...photoGrid.children].forEach((card,i)=>{
+    photoCards.get(card.dataset.id).title.textContent=`Door ${i+1}`;
+  });
+  $('doorEmpty').style.display=rows.size?'none':'block';
+  $('photoEmpty').style.display=photoCards.size?'none':'block';
+}
+
+function updateBadge(id){
+  const r=rows.get(id),p=photoCards.get(id);
+  if(!r||!p)return;
+  p.badge.textContent=r.f.ref.value||'—';
+}
+
+// ─── PHOTOS ───────────────────────────────────────────────────────────────────
+let activeTarget=null;
+
+function closePickers(){
+  document.querySelectorAll('.photo-picker.open').forEach(p=>{
+    p.classList.remove('open');
+    const b=p.parentElement?.querySelector('.add-photo-btn');
+    if(b)b.style.display='flex';
+  });
+}
+
+function buildPhotoCard(id,index){
+  const card=document.createElement('div');
+  card.className='photo-card';card.dataset.id=id;
+
+  const hdr=document.createElement('div');hdr.className='photo-card-header';
+  const title=document.createElement('div');title.className='photo-card-title';
+  const badge=document.createElement('span');badge.className='photo-ref-badge';
+  hdr.append(title,badge);card.appendChild(hdr);
+
+  const sw=document.createElement('div');sw.className='photo-slots';
+  const slots={};
+
+  PHOTO_SLOTS.forEach(({key,label})=>{
+    const slot=document.createElement('div');slot.className='photo-slot';
+    const sh=document.createElement('div');sh.className='photo-slot-hdr';sh.textContent=label;
+    const thumbs=document.createElement('div');thumbs.className='photo-thumbs';
+    const count=document.createElement('div');count.className='photo-count';
+
+    const addBtn=document.createElement('button');
+    addBtn.className='add-photo-btn';
+    addBtn.innerHTML='<span class="cam-icon">📷</span> Add Photo';
+
+    const picker=document.createElement('div');picker.className='photo-picker';
+    const pick=(inputId)=>{
+      activeTarget={doorId:id,slot:key};
+      const inp=$(inputId);inp.value='';inp.click();closePickers();
+    };
+    const takeOpt=document.createElement('button');takeOpt.className='picker-option';
+    takeOpt.innerHTML='<span class="p-icon">📸</span><span class="p-text"><span class="p-title">Take Photo Now</span><span class="p-sub">Opens your camera — snap it on the spot</span></span>';
+    takeOpt.addEventListener('click',()=>pick('cameraInput'));
+    const upOpt=document.createElement('button');upOpt.className='picker-option';
+    upOpt.innerHTML='<span class="p-icon">🖼️</span><span class="p-text"><span class="p-title">Upload from Files</span><span class="p-sub">Choose photos already saved on this device</span></span>';
+    upOpt.addEventListener('click',()=>pick('galleryInput'));
+    const cr=document.createElement('div');cr.className='picker-cancel-row';
+    const cb=document.createElement('button');cb.textContent='Cancel';
+    cb.addEventListener('click',()=>{picker.classList.remove('open');addBtn.style.display='flex';});
+    cr.appendChild(cb);
+    picker.append(takeOpt,upOpt,cr);
+
+    addBtn.addEventListener('click',()=>{closePickers();picker.classList.add('open');addBtn.style.display='none';});
+
+    slot.append(sh,thumbs,count,addBtn,picker);
+    sw.appendChild(slot);
+    slots[key]={thumbs,count};
+  });
+
+  card.appendChild(sw);
+  photoGrid.insertBefore(card,photoGrid.children[index]||null);
+
+  const entry={card,title,badge,slots,photos:[],unsub:null};
+  photoCards.set(id,entry);
+
+  entry.unsub=onSnapshot(collection(db,'jobs',jobId,'doors',id,'photos'),snap=>{
+    entry.photos=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(a.createdAt?.toMillis?.()??Infinity)-(b.createdAt?.toMillis?.()??Infinity));
+    renderThumbs(id);
+    setPending('photos-'+id,snap.metadata.hasPendingWrites);
+  });
+}
+
+function renderThumbs(doorId){
+  const entry=photoCards.get(doorId);if(!entry)return;
+  PHOTO_SLOTS.forEach(({key})=>{
+    const {thumbs,count}=entry.slots[key];
+    const list=entry.photos.filter(p=>p.slot===key);
+    thumbs.innerHTML='';
+    list.forEach(p=>{
+      const wrap=document.createElement('div');wrap.className='photo-thumb-wrap';
+      const img=document.createElement('img');img.src=p.data;img.className='photo-thumb';
+      img.addEventListener('click',()=>{$('lightboxImg').src=p.data;$('lightbox').classList.add('open');});
+      const del=document.createElement('button');del.className='thumb-del';del.textContent='✕';
+      del.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(!confirm('Delete this photo for everyone on this job?'))return;
+        deleteDoc(doc(db,'jobs',jobId,'doors',doorId,'photos',p.id)).catch(err=>showToast('Could not delete photo: '+err.message,'error'));
+      });
+      wrap.append(img,del);thumbs.appendChild(wrap);
+    });
+    count.textContent=list.length?`${list.length} photo${list.length>1?'s':''} attached`:'';
+  });
+}
+
+// Firestore documents are capped at 1 MiB, so shrink until the base64 string fits comfortably.
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let max=900,q=0.78,out='';
+      for(let i=0;i<5;i++){
+        let w=img.width,h=img.height;
+        if(w>max){h=Math.round(h*max/w);w=max;}
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        out=cv.toDataURL('image/jpeg',q);
+        if(out.length<800000)break;
+        max=Math.round(max*0.8);q=Math.max(0.4,q-0.08);
+      }
+      resolve(out);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read that image'));};
+    img.src=url;
+  });
+}
+
+async function handleFiles(input){
+  const target=activeTarget;
+  if(!target||!input.files||!input.files.length)return;
+  const files=[...input.files];
+  let done=0;
+  for(const file of files){
+    try{
+      const data=await compressImage(file);
+      await addDoc(collection(db,'jobs',jobId,'doors',target.doorId,'photos'),{
+        slot:target.slot,data,createdAt:serverTimestamp()
+      });
+      done++;
+    }catch(err){showToast('Photo failed: '+err.message,'error');}
+  }
+  if(done){touchJob();showToast(`✓ ${done} photo${done>1?'s':''} added`,'success');}
+}
+$('cameraInput').addEventListener('change',e=>handleFiles(e.target));
+$('galleryInput').addEventListener('change',e=>handleFiles(e.target));
+
+function closeLightbox(){$('lightbox').classList.remove('open');}
+$('lightbox').addEventListener('click',closeLightbox);
+$('lbClose').addEventListener('click',closeLightbox);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
+// ─── PRINT ────────────────────────────────────────────────────────────────────
+// The print stylesheet hides the form widgets and shows plain-text copies of their values.
+function preparePrint(){
+  document.querySelectorAll('#doorBody tr').forEach(tr=>{
+    const sels=[...tr.querySelectorAll('select')];
+    const inps=[...tr.querySelectorAll('input[type=text]')];
+    const date=tr.querySelector('input[type=date]')?.value||'';
+    const num=tr.querySelector('.row-num')?.textContent||'';
+    const loc=(sels[0]?.value||'')+(inps[1]?.value?'\n'+inps[1].value:'');
+    const init=(sels[2]?.value||'')+(inps[2]?.value?' / '+inps[2].value:'');
+    const vals=[num,inps[0]?.value||'',loc,sels[1]?.value||'',date,init,
+      sels[3]?.value||'',sels[4]?.value||'',sels[5]?.value||'',sels[6]?.value||'',
+      tr.querySelector('textarea')?.value||''];
+    tr.querySelectorAll('td').forEach((td,i)=>{
+      if(i<vals.length){
+        const pv=document.createElement('span');
+        pv.className='print-val';
+        pv.style.whiteSpace='pre-line';
+        pv.textContent=vals[i]||'—';
+        td.appendChild(pv);
+      }
+    });
+  });
+}
+function cleanupPrint(){document.querySelectorAll('.print-val').forEach(el=>el.remove());}
+window.addEventListener('beforeprint',preparePrint);
+window.addEventListener('afterprint',cleanupPrint);
+
+// ─── LIVE LISTENERS (start once signed in) ────────────────────────────────────
+let started=false;
+function startListeners(){
+  if(started)return;
+  started=true;
+
+  onSnapshot(jobRef,{includeMetadataChanges:true},snap=>{
+    setPending('job',snap.metadata.hasPendingWrites);
+    if(!snap.exists()){
+      if(!snap.metadata.fromCache){showToast('That job no longer exists','error');setTimeout(()=>location.replace('jobs.html'),1500);}
+      return;
+    }
+    const d=snap.data();
+    JOB_FIELDS.forEach(id=>{
+      const el=$(id);
+      if(el===document.activeElement||id in jobPending)return;
+      const v=d[id]??'';
+      if(el.value!==v)el.value=v;
+    });
+    const label=[d.riaRef,d.projRef].filter(Boolean).join(' — ');
+    $('topbarJob').textContent=label||'Record of Installation Activities';
+    document.title=label?`${label} — RIA`:'PML Fire Protection — RIA';
+  },err=>{
+    console.error(err);
+    showToast('Could not load job — check your connection and Firebase setup','error');
+  });
+
+  onSnapshot(query(doorsCol,orderBy('order')),{includeMetadataChanges:true},snap=>{
+    setPending('doors',snap.metadata.hasPendingWrites);
+    snap.docChanges().forEach(ch=>{
+      const id=ch.doc.id;
+      if(ch.type==='added'){
+        const tr=buildRow(id);
+        tbody.insertBefore(tr,tbody.children[ch.newIndex]||null);
+        buildPhotoCard(id,ch.newIndex);
+        applyDoorData(id,ch.doc.data());
+      }else if(ch.type==='modified'){
+        applyDoorData(id,ch.doc.data());
+      }else if(ch.type==='removed'){
+        rows.get(id)?.tr.remove();rows.delete(id);
+        const p=photoCards.get(id);
+        if(p){p.unsub?.();p.card.remove();photoCards.delete(id);pendingSources.delete('photos-'+id);}
+      }
+    });
+    renumber();
+    updateStatus();
+  },err=>{
+    console.error(err);
+    showToast('Could not load doors — check your connection and Firebase setup','error');
+  });
+}
+
+onAuthStateChanged(auth,user=>{
+  if(!user){location.replace('index.html');return;}
+  startListeners();
+});
+</script>
+</body>
+</html>

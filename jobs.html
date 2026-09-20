@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PML RIA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<title>PML Fire Protection — Jobs</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .job-list{display:flex;flex-direction:column;gap:10px}
+  .job-item{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;cursor:pointer;transition:border-color .15s,background .15s}
+  .job-item:hover{border-color:var(--accent);background:#f0f7ff}
+  .job-item-info strong{font-size:14px;display:block}
+  .job-item-info .addr{font-size:12px;color:var(--muted);margin-top:3px;max-width:520px}
+  .job-item-info .meta{font-size:11px;color:var(--muted);margin-top:4px}
+  .new-job-form{display:none}
+  .new-job-form.open{display:block}
+  .empty-state{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo-badge">PML FP</span>
+    <span class="topbar-title">Jobs <span>/ Q-Mark Fire Door Installation Scheme</span></span>
+  </div>
+  <div class="topbar-actions">
+    <span id="userEmail" style="color:#aaa;font-size:12px"></span>
+    <button class="btn btn-ghost btn-sm" id="signOutBtn">Sign Out</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="status-bar online" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText">Checking connection…</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>📁 Jobs</h2>
+      <button class="btn btn-blue btn-sm" id="newJobBtn">＋ New Job</button>
+    </div>
+    <div class="card-body">
+      <div class="new-job-form" id="newJobForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>RIA Register Reference Number <span class="req">*</span></label>
+            <input type="text" id="njRiaRef" placeholder="e.g. RIA-2024-001">
+          </div>
+          <div class="field">
+            <label>Internal Installation Project Reference</label>
+            <input type="text" id="njProjRef" placeholder="e.g. PML-2024-052">
+          </div>
+          <div class="field full">
+            <label>Client Name &amp; Site Address <span class="req">*</span></label>
+            <textarea id="njSiteAddress" rows="2" placeholder="Client name, building name, street, town, postcode"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-blue" id="createJobBtn">Create Job</button>
+          <button class="btn btn-ghost" id="cancelJobBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="job-list" id="jobList">
+        <div class="empty-state">Loading jobs…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { auth, db } from "./firebase-init.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import {
+  collection, query, orderBy, onSnapshot, addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+const jobList = document.getElementById('jobList');
+const statusBar = document.getElementById('statusBar');
+const statusText = document.getElementById('statusText');
+const newJobForm = document.getElementById('newJobForm');
+
+let tt;
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  clearTimeout(tt); tt = setTimeout(()=> t.className = 'toast', 3200);
+}
+
+function updateOnlineStatus(){
+  const online = navigator.onLine;
+  statusBar.className = 'status-bar ' + (online ? 'online' : 'offline');
+  statusText.textContent = online
+    ? 'Online — jobs sync live across every device'
+    : 'Offline — you can still open and edit jobs; changes sync once you\'re back online';
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+document.getElementById('signOutBtn').addEventListener('click', ()=> signOut(auth));
+
+onAuthStateChanged(auth, user=>{
+  if(!user){ window.location.href = 'index.html'; return; }
+  document.getElementById('userEmail').textContent = user.email;
+});
+
+document.getElementById('newJobBtn').addEventListener('click', ()=>{
+  newJobForm.classList.add('open');
+  document.getElementById('njRiaRef').focus();
+});
+document.getElementById('cancelJobBtn').addEventListener('click', ()=>{
+  newJobForm.classList.remove('open');
+});
+
+document.getElementById('createJobBtn').addEventListener('click', async ()=>{
+  const riaRef = document.getElementById('njRiaRef').value.trim();
+  const projRef = document.getElementById('njProjRef').value.trim();
+  const siteAddress = document.getElementById('njSiteAddress').value.trim();
+  if(!riaRef || !siteAddress){
+    showToast('RIA Reference and Site Address are required', 'error');
+    return;
+  }
+  const btn = document.getElementById('createJobBtn');
+  btn.disabled = true;
+  try{
+    const docRef = await addDoc(collection(db, 'jobs'), {
+      riaRef, projRef, siteAddress,
+      companyName: 'Planning Manager LTD (PML Fire Protection)',
+      certNum: '4322',
+      approvedPerson: '', approvedNum: '', sigName: '', sigDate: '',
+      createdBy: auth.currentUser?.email || '',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    // Works offline too: addDoc resolves immediately from local cache and syncs later.
+    window.location.href = `ria.html?job=${docRef.id}`;
+  }catch(err){
+    showToast('Could not create job: ' + err.message, 'error');
+    btn.disabled = false;
+  }
+});
+
+const q = query(collection(db, 'jobs'), orderBy('updatedAt', 'desc'));
+onSnapshot(q, snap=>{
+  if(snap.empty){
+    jobList.innerHTML = '<div class="empty-state">No jobs yet — tap "+ New Job" to create the first one.</div>';
+    return;
+  }
+  jobList.innerHTML = '';
+  snap.forEach(docSnap=>{
+    const d = docSnap.data();
+    const row = document.createElement('div');
+    row.className = 'job-item';
+    const updated = d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : 'just now';
+    row.innerHTML = `
+      <div class="job-item-info">
+        <strong>${escapeHtml(d.riaRef || '(no ref)')}${d.projRef ? ' — ' + escapeHtml(d.projRef) : ''}</strong>
+        <div class="addr">${escapeHtml(d.siteAddress || '')}</div>
+        <div class="meta">Updated ${updated}</div>
+      </div>
+      <button class="btn btn-blue btn-sm">Open</button>
+    `;
+    row.addEventListener('click', ()=> window.location.href = `ria.html?job=${docSnap.id}`);
+    jobList.appendChild(row);
+  });
+}, err=>{
+  jobList.innerHTML = '<div class="empty-state">Could not load jobs. Check your Firebase setup (see README) and your connection.</div>';
+  console.error(err);
+});
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
