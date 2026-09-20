@@ -7,71 +7,90 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PML RIA">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1a1a1a">
+<meta name="theme-color" content="#0E0602">
+<link rel="icon" href="assets/icon-180.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
 <title>PML Fire Protection — Jobs</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  .job-list{display:flex;flex-direction:column;gap:10px}
-  .job-item{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;cursor:pointer;transition:border-color .15s,background .15s}
-  .job-item:hover{border-color:var(--accent);background:#f0f7ff}
-  .job-item-info strong{font-size:14px;display:block}
-  .job-item-info .addr{font-size:12px;color:var(--muted);margin-top:3px;max-width:520px}
-  .job-item-info .meta{font-size:11px;color:var(--muted);margin-top:4px}
-  .new-job-form{display:none}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .eyebrow{font-family:var(--ffh);font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-deep)}
+  .page-head h1{font-family:var(--ffh);font-size:28px;font-weight:800;letter-spacing:-.3px;margin-top:2px}
+  .page-head p{color:var(--muted);font-size:13px;margin-top:2px}
+  .search{max-width:280px;width:100%;position:relative}
+  .search input{padding-left:38px;font-size:15px}
+  .search::before{content:'';position:absolute;left:13px;top:50%;width:14px;height:14px;transform:translateY(-50%);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f675e' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat center/contain;pointer-events:none}
+
+  .job-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .job-item{background:#fff;border:1px solid var(--border);border-left:5px solid var(--yellow);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:box-shadow .15s,transform .1s,border-color .15s;box-shadow:var(--shadow)}
+  .job-item:hover{box-shadow:0 2px 4px rgba(14,6,2,.08),0 12px 28px rgba(14,6,2,.12);transform:translateY(-2px);border-left-color:var(--black)}
+  .job-ref{font-family:var(--ffh);font-weight:800;font-size:15px}
+  .job-ref small{font-weight:600;color:var(--muted);font-size:12px;margin-left:6px}
+  .job-item .addr{font-size:13px;color:#4b433b;line-height:1.45;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .job-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+  .job-item .meta{font-size:11.5px;color:var(--muted)}
+  .open-link{font-family:var(--ffh);font-weight:700;font-size:12px;color:var(--black);background:var(--yellow);padding:6px 12px;border-radius:8px}
+  .new-job-form{display:none;background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden}
   .new-job-form.open{display:block}
-  .empty-state{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px}
+  .empty-state{grid-column:1/-1;color:var(--muted);font-size:14px;text-align:center;padding:44px 10px;background:#fff;border:1.5px dashed var(--border);border-radius:12px}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-left">
-    <span class="logo-badge">PML FP</span>
-    <span class="topbar-title">Jobs <span>/ Q-Mark Fire Door Installation Scheme</span></span>
+    <a class="brand" href="jobs.html"><img src="assets/logo-light.png" alt="PML"><span class="brand-sub">Fire<br>Protection</span></a>
   </div>
   <div class="topbar-actions">
-    <span id="userEmail" style="color:#aaa;font-size:12px"></span>
+    <span id="userEmail" style="color:#a39a8f;font-size:12px"></span>
     <button class="btn btn-ghost btn-sm" id="signOutBtn">Sign Out</button>
   </div>
 </div>
 
 <div class="main">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Q-Mark Fire Door Installation Scheme</div>
+      <h1>Jobs</h1>
+      <p id="jobCount">Loading…</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:1;justify-content:flex-end">
+      <div class="search"><input type="text" id="searchBox" placeholder="Search jobs…" autocomplete="off"></div>
+      <button class="btn btn-blue" id="newJobBtn">＋ New Job</button>
+    </div>
+  </div>
+
   <div class="status-bar online" id="statusBar">
     <div class="status-dot"></div>
     <span id="statusText">Checking connection…</span>
   </div>
 
-  <div class="card">
-    <div class="card-header">
-      <h2>📁 Jobs</h2>
-      <button class="btn btn-blue btn-sm" id="newJobBtn">＋ New Job</button>
-    </div>
+  <div class="new-job-form" id="newJobForm">
+    <div class="card-header"><h2>New job</h2></div>
     <div class="card-body">
-      <div class="new-job-form" id="newJobForm">
-        <div class="form-grid">
-          <div class="field">
-            <label>RIA Register Reference Number <span class="req">*</span></label>
-            <input type="text" id="njRiaRef" placeholder="e.g. RIA-2024-001">
-          </div>
-          <div class="field">
-            <label>Internal Installation Project Reference</label>
-            <input type="text" id="njProjRef" placeholder="e.g. PML-2024-052">
-          </div>
-          <div class="field full">
-            <label>Client Name &amp; Site Address <span class="req">*</span></label>
-            <textarea id="njSiteAddress" rows="2" placeholder="Client name, building name, street, town, postcode"></textarea>
-          </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>RIA Register Reference Number <span class="req">*</span></label>
+          <input type="text" id="njRiaRef" placeholder="e.g. RIA-2024-001">
         </div>
-        <div style="display:flex;gap:10px;margin-top:12px">
-          <button class="btn btn-blue" id="createJobBtn">Create Job</button>
-          <button class="btn btn-ghost" id="cancelJobBtn">Cancel</button>
+        <div class="field">
+          <label>Internal Installation Project Reference</label>
+          <input type="text" id="njProjRef" placeholder="e.g. PML-2024-052">
+        </div>
+        <div class="field full">
+          <label>Client Name &amp; Site Address <span class="req">*</span></label>
+          <textarea id="njSiteAddress" rows="2" placeholder="Client name, building name, street, town, postcode"></textarea>
         </div>
       </div>
-
-      <div class="job-list" id="jobList">
-        <div class="empty-state">Loading jobs…</div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-blue" id="createJobBtn">Create Job</button>
+        <button class="btn btn-outline" id="cancelJobBtn">Cancel</button>
       </div>
     </div>
+  </div>
+
+  <div class="job-list" id="jobList">
+    <div class="empty-state">Loading jobs…</div>
   </div>
 </div>
 
@@ -88,6 +107,7 @@ const jobList = document.getElementById('jobList');
 const statusBar = document.getElementById('statusBar');
 const statusText = document.getElementById('statusText');
 const newJobForm = document.getElementById('newJobForm');
+const searchBox = document.getElementById('searchBox');
 
 let tt;
 function showToast(msg, type='success'){
@@ -142,7 +162,6 @@ document.getElementById('createJobBtn').addEventListener('click', async ()=>{
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    // Works offline too: addDoc resolves immediately from local cache and syncs later.
     window.location.href = `ria.html?job=${docRef.id}`;
   }catch(err){
     showToast('Could not create job: ' + err.message, 'error');
@@ -150,31 +169,42 @@ document.getElementById('createJobBtn').addEventListener('click', async ()=>{
   }
 });
 
-const q = query(collection(db, 'jobs'), orderBy('updatedAt', 'desc'));
-onSnapshot(q, snap=>{
-  if(snap.empty){
-    jobList.innerHTML = '<div class="empty-state">No jobs yet — tap "+ New Job" to create the first one.</div>';
+let jobs = [];
+
+function renderJobs(){
+  const term = searchBox.value.trim().toLowerCase();
+  const shown = term
+    ? jobs.filter(j => [j.riaRef, j.projRef, j.siteAddress].join(' ').toLowerCase().includes(term))
+    : jobs;
+  document.getElementById('jobCount').textContent =
+    `${jobs.length} job${jobs.length === 1 ? '' : 's'}` + (term ? ` · ${shown.length} match${shown.length === 1 ? '' : 'es'}` : '');
+
+  if(!shown.length){
+    jobList.innerHTML = `<div class="empty-state">${jobs.length ? 'No jobs match your search.' : 'No jobs yet — tap "＋ New Job" to create the first one.'}</div>`;
     return;
   }
   jobList.innerHTML = '';
-  snap.forEach(docSnap=>{
-    const d = docSnap.data();
+  shown.forEach(j=>{
     const row = document.createElement('div');
     row.className = 'job-item';
-    const updated = d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleString() : 'just now';
+    const updated = j.updatedAt?.toDate ? j.updatedAt.toDate().toLocaleString('en-GB', {dateStyle:'medium', timeStyle:'short'}) : 'just now';
     row.innerHTML = `
-      <div class="job-item-info">
-        <strong>${escapeHtml(d.riaRef || '(no ref)')}${d.projRef ? ' — ' + escapeHtml(d.projRef) : ''}</strong>
-        <div class="addr">${escapeHtml(d.siteAddress || '')}</div>
-        <div class="meta">Updated ${updated}</div>
-      </div>
-      <button class="btn btn-blue btn-sm">Open</button>
+      <div class="job-ref">${escapeHtml(j.riaRef || '(no ref)')}${j.projRef ? `<small>${escapeHtml(j.projRef)}</small>` : ''}</div>
+      <div class="addr">${escapeHtml(j.siteAddress || '')}</div>
+      <div class="job-foot"><span class="meta">Updated ${updated}</span><span class="open-link">Open →</span></div>
     `;
-    row.addEventListener('click', ()=> window.location.href = `ria.html?job=${docSnap.id}`);
+    row.addEventListener('click', ()=> window.location.href = `ria.html?job=${j.id}`);
     jobList.appendChild(row);
   });
+}
+searchBox.addEventListener('input', renderJobs);
+
+const q = query(collection(db, 'jobs'), orderBy('updatedAt', 'desc'));
+onSnapshot(q, snap=>{
+  jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderJobs();
 }, err=>{
-  jobList.innerHTML = '<div class="empty-state">Could not load jobs. Check your Firebase setup (see README) and your connection.</div>';
+  jobList.innerHTML = '<div class="empty-state">Could not load jobs. Check your connection and Firebase setup.</div>';
   console.error(err);
 });
 

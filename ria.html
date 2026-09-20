@@ -7,119 +7,52 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PML RIA">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1a1a1a">
+<meta name="theme-color" content="#0E0602">
+<link rel="icon" href="assets/icon-180.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
 <title>PML Fire Protection — RIA</title>
 <link rel="stylesheet" href="style.css">
-<style>
-  .declaration{background:#fafafa;border:1px solid var(--border);border-radius:7px;padding:14px 16px;font-size:13px;color:#555;line-height:1.6;margin-bottom:14px}
-
-  .door-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border)}
-  .door-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:960px}
-  .door-table th{background:#f1f5f9;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 7px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
-  .door-table td{padding:6px 5px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
-  .door-table tr:last-child td{border-bottom:none}
-  .door-table select,.door-table input[type=text],.door-table input[type=date]{padding:7px 8px;font-size:13px;border-radius:6px;min-width:80px}
-  .door-table select{padding-right:24px}
-  .door-ref{font-family:var(--ffm);font-weight:700;color:var(--accent)}
-  .row-num{width:26px;height:26px;background:var(--accent2);color:var(--accent);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-  .table-actions{padding:12px 0 0;display:flex;gap:10px;align-items:center}
-  .remove-row{background:none;border:none;cursor:pointer;color:#dc2626;font-size:18px;padding:4px 7px;border-radius:4px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
-  .remove-row:hover,.remove-row:active{background:var(--red-bg)}
-  .empty-note{color:var(--muted);font-size:13px;text-align:center;padding:18px}
-
-  .section-divider{display:flex;align-items:center;gap:14px;margin:22px 0 14px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
-  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-
-  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-  .photo-card{border:1.5px solid var(--border);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-  .photo-card-header{background:var(--mid);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-  .photo-card-title{color:#fff;font-size:13px;font-weight:600}
-  .photo-ref-badge{font-family:var(--ffm);font-size:11px;background:rgba(255,255,255,.18);color:#fff;padding:2px 8px;border-radius:4px}
-  .photo-slots{padding:10px;display:flex;flex-direction:column;gap:10px}
-  .photo-slot{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fafafa}
-  .photo-slot-hdr{background:#f1f5f9;padding:7px 11px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
-  .add-photo-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 0;border:none;border-radius:0;font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;background:var(--accent2);color:var(--accent);border-top:1.5px dashed #93c5fd;min-height:48px}
-  .add-photo-btn:hover,.add-photo-btn:active{background:#bfdbfe}
-  .cam-icon{font-size:20px}
-  .photo-picker{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border)}
-  .photo-picker.open{display:flex}
-  .picker-option{display:flex;align-items:center;gap:13px;padding:15px 14px;border:none;background:#fff;font-family:var(--ff);font-size:14px;font-weight:500;cursor:pointer;color:var(--dark);border-bottom:1px solid #f1f5f9;text-align:left;width:100%;min-height:64px}
-  .picker-option:hover,.picker-option:active{background:#f0f7ff}
-  .picker-option .p-icon{font-size:28px;flex-shrink:0}
-  .picker-option .p-text{display:flex;flex-direction:column}
-  .picker-option .p-title{font-size:14px;font-weight:600}
-  .picker-option .p-sub{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
-  .picker-cancel-row{padding:8px 14px;text-align:right;border-top:1px solid #f1f5f9;background:#fafafa}
-  .picker-cancel-row button{background:none;border:none;font-family:var(--ff);font-size:13px;color:var(--muted);cursor:pointer;padding:6px 10px;min-height:36px}
-  .photo-thumbs{display:flex;flex-wrap:wrap;gap:7px;padding:8px 10px 6px}
-  .photo-thumb-wrap{position:relative}
-  .photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;border:2px solid var(--border);display:block;cursor:pointer}
-  .thumb-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#dc2626;color:#fff;border:2px solid #fff;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
-  .photo-count{font-size:11px;color:var(--muted);padding:0 10px 8px}
-
-  .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}
-  .lightbox.open{display:flex}
-  .lightbox img{max-width:94vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.6)}
-  .lb-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:20px;color:#fff;font-size:32px;cursor:pointer;background:rgba(0,0,0,.5);border:none;line-height:1;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-
-  .print-val{display:none}
-
-  @media print{
-    @page{size:A4 landscape;margin:8mm 10mm}
-    .topbar,.table-actions,.remove-row,.btn,.status-bar,.section-divider,
-    .add-photo-btn,.photo-picker,.thumb-del,.lightbox,.picker-cancel-row,.empty-note,.no-print{display:none!important}
-    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-    body{background:#fff!important;padding:0!important;font-size:9pt}
-    .main{padding:0!important;max-width:100%!important}
-    .card{box-shadow:none!important;border:1px solid #999!important;margin-bottom:6mm!important;page-break-inside:avoid;border-radius:0!important}
-    .card-header{background:#333!important;padding:6px 10px!important}
-    .card-header h2{font-size:10pt!important}
-    .card-body{padding:8px 10px!important}
-    .form-grid{gap:6px!important}
-    .field input,.field select,.field textarea{border:none!important;padding:0!important;font-size:9pt!important;background:transparent!important;box-shadow:none!important;height:auto!important;min-height:0!important}
-    .field label{font-size:7pt!important;margin-bottom:1px!important}
-    .declaration{font-size:8pt!important;padding:6px 8px!important}
-    .door-table-wrap{overflow:visible!important;border:none!important;border-radius:0!important}
-    .door-table{min-width:0!important;width:100%!important;table-layout:fixed!important;font-size:7.5pt!important;border-collapse:collapse!important}
-    .door-table th{font-size:6.5pt!important;padding:4px 3px!important;background:#eee!important;border:1px solid #aaa!important;white-space:normal!important;line-height:1.2!important}
-    .door-table td{padding:3px!important;border:1px solid #ccc!important;vertical-align:top!important;word-break:break-word!important;line-height:1.3!important}
-    .door-table th:nth-child(1),.door-table td:nth-child(1){width:18px!important}
-    .door-table th:nth-child(2),.door-table td:nth-child(2){width:52px!important}
-    .door-table th:nth-child(3),.door-table td:nth-child(3){width:22mm!important}
-    .door-table th:nth-child(4),.door-table td:nth-child(4){width:14mm!important}
-    .door-table th:nth-child(5),.door-table td:nth-child(5){width:18mm!important}
-    .door-table th:nth-child(6),.door-table td:nth-child(6){width:12mm!important}
-    .door-table th:nth-child(7),.door-table td:nth-child(7){width:18mm!important}
-    .door-table th:nth-child(8),.door-table td:nth-child(8){width:18mm!important}
-    .door-table th:nth-child(9),.door-table td:nth-child(9){width:24mm!important}
-    .door-table th:nth-child(10),.door-table td:nth-child(10){width:24mm!important}
-    .door-table th:nth-child(11),.door-table td:nth-child(11){width:auto!important}
-    .door-table th:nth-child(12),.door-table td:nth-child(12){display:none!important}
-    .door-table td select,.door-table td input,.door-table td textarea{display:none!important}
-    .print-val{display:block!important;font-size:7.5pt!important;color:#111!important}
-    .photo-grid{display:block!important}
-    .photo-card{page-break-inside:avoid;margin-bottom:4mm!important;border-radius:0!important}
-    .photo-slot{border-radius:0!important}
-    .photo-thumbs{flex-wrap:wrap!important}
-    .photo-thumb{width:110px!important;height:110px!important}
-  }
-</style>
+<link rel="stylesheet" href="ria.css">
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-left">
+    <a class="brand" href="jobs.html" title="Back to jobs"><img src="assets/logo-light.png" alt="PML"><span class="brand-sub">Fire<br>Protection</span></a>
     <a class="btn btn-ghost btn-sm" href="jobs.html">← Jobs</a>
-    <span class="logo-badge">PML FP</span>
     <span class="topbar-title" id="topbarJob">Record of Installation Activities</span>
   </div>
   <div class="topbar-actions">
-    <button class="btn btn-green" id="printBtn">🖨 Print</button>
+    <button class="btn btn-green" id="printBtn">🖨 Print / PDF</button>
     <button class="btn btn-ghost btn-sm" id="signOutBtn">Sign Out</button>
   </div>
 </div>
 
 <div class="main">
+
+  <div class="print-only print-head">
+    <img class="ph-logo" src="assets/logo-dark-print.png" alt="PML">
+    <div class="ph-title">
+      <div class="ph-eyebrow">Q-Mark Fire Door Installation Scheme</div>
+      <div class="ph-h">Record of Installation Activities</div>
+    </div>
+    <div class="ph-ref">
+      <div><span>RIA Ref</span><b id="phRia">—</b></div>
+      <div><span>Project Ref</span><b id="phProj">—</b></div>
+    </div>
+  </div>
+
+  <section class="job-hero">
+    <div>
+      <div class="eyebrow">Record of Installation Activities</div>
+      <h1 id="heroTitle">Loading job…</h1>
+      <p id="heroAddr"></p>
+    </div>
+    <div class="chips">
+      <div class="chip"><b id="chipDoors">0</b>doors</div>
+      <div class="chip"><b id="chipPhotos">0</b>photos</div>
+    </div>
+  </section>
 
   <div class="status-bar online" id="statusBar">
     <div class="status-dot"></div>
@@ -128,7 +61,7 @@
 
   <div class="card">
     <div class="card-header">
-      <h2>🏢 Job &amp; Company Details <span class="tag">Q-MARK FIRE DOOR INSTALLATION SCHEME</span></h2>
+      <h2>Job &amp; Company Details <span class="tag">Q-MARK FIRE DOOR INSTALLATION SCHEME</span></h2>
     </div>
     <div class="card-body">
       <div class="form-grid">
@@ -185,7 +118,7 @@
 
   <div class="card">
     <div class="card-header">
-      <h2>🚪 Fire Door Installation Entries</h2>
+      <h2>Fire Door Installation Entries</h2>
       <button class="btn btn-ghost btn-sm" id="addDoorTop">＋ Add Door</button>
     </div>
     <div class="card-body">
@@ -204,15 +137,15 @@
       </div>
       <div class="empty-note" id="doorEmpty">No doors on this job yet — tap "＋ Add Door".</div>
       <div class="table-actions">
-        <button class="btn btn-ghost btn-sm" style="color:var(--dark);border-color:var(--border)" id="addDoorBottom">＋ Add another door</button>
+        <button class="btn btn-blue btn-sm" id="addDoorBottom">＋ Add another door</button>
         <span style="font-size:11px;color:var(--muted)">Changes save automatically and sync to everyone on this job</span>
       </div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="photosCard">
     <div class="card-header">
-      <h2>📷 Photograph Records</h2>
+      <h2>Photograph Records</h2>
       <span class="tag">Tap button to take or upload photos</span>
     </div>
     <div class="card-body">
@@ -223,6 +156,10 @@
       <div class="empty-note" id="photoEmpty">Add door entries above to generate photo slots.</div>
     </div>
   </div>
+</div>
+
+<div class="print-only print-footer">
+  <span>Planning Manager Ltd t/a PML Fire Protection &nbsp;·&nbsp; Q-Mark Certificate 4322 &nbsp;·&nbsp; Printed <span id="phPrinted"></span></span>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -250,7 +187,7 @@ const PLUGI=['— Select —','PML Label Applied','PML Plug Fitted','PML Plug + 
 const DDOC=['— Select —','Manufacturer Cert / Data Sheet','BM TRADA Q-Mark Certificate','Fire Test Report','Global Assessment Report','Field of Application (EXAP)','Third Party Cert (Exova)','Third Party Cert (IFCC)','Manufacturer Installation Instructions','Project Specification','Engineers Report','N/A','Other (see comments)'];
 const FSDOC=['— Select —','Manufacturer Installation Instructions','BS 8214:2016 Compliant','BS 8214:2026 Compliant','Intumescent Mastic Cert','Mineral Wool Cert','PU Foam Fire Rating Cert','Fire Stopping Inspection Record','Project Specification','N/A','Other (see comments)'];
 const INITS=['— —','PB','AL','Other'];
-const PHOTO_SLOTS=[{key:'before',label:'📸 Before Installation'},{key:'during',label:'📸 During / After Installation'},{key:'extra',label:'📸 Additional Details'}];
+const PHOTO_SLOTS=[{key:'before',label:'Before Installation'},{key:'during',label:'During / After Installation'},{key:'extra',label:'Additional Details'}];
 const DOOR_DEFAULTS={ref:'',loc:LOCS[0],locFree:'',fp:FPS[0],date:'',init:INITS[0],initFree:'',plugMfr:PLUGC[0],plugInst:PLUGI[0],doorDoc:DDOC[0],fsDoc:FSDOC[0],comments:''};
 const JOB_FIELDS=['riaRef','projRef','approvedPerson','approvedNum','siteAddress','sigName','sigDate'];
 const DEBOUNCE=600;
@@ -352,14 +289,14 @@ function mkInp(ph,type='text'){
   i.type=type;i.placeholder=ph;i.autocomplete='off';
   return i;
 }
-function cell(...kids){const td=document.createElement('td');td.append(...kids);return td;}
+function cell(label,...kids){const td=document.createElement('td');if(label)td.dataset.label=label;td.append(...kids);return td;}
 
 function buildRow(id){
   const tr=document.createElement('tr');tr.dataset.id=id;
   const f={};
   const bind=(field,el)=>{
     f[field]=el;
-    const h=()=>{queueDoorSave(id,field,el.value);if(field==='ref')updateBadge(id);};
+    const h=()=>{queueDoorSave(id,field,el.value);if(field==='ref'||field==='loc'||field==='locFree')updateBadge(id);};
     el.addEventListener('input',h);
     el.addEventListener('change',h);
     return el;
@@ -367,7 +304,7 @@ function buildRow(id){
   const small=el=>{el.style.marginTop='4px';el.style.fontSize='12px';el.style.padding='5px 8px';return el;};
 
   const num=document.createElement('span');num.className='row-num';
-  const ref=bind('ref',mkInp('FD-001'));ref.className='door-ref';ref.style.width='78px';
+  const ref=bind('ref',mkInp('FD-01'));ref.className='door-ref';ref.style.width='78px';
   const loc=bind('loc',mkSel(LOCS));loc.style.minWidth='140px';
   const locFree=small(bind('locFree',mkInp('Or type location')));
   const init=bind('init',mkSel(INITS));init.style.minWidth='60px';
@@ -380,12 +317,12 @@ function buildRow(id){
   del.addEventListener('click',()=>removeDoor(id));
 
   tr.append(
-    cell(num),cell(ref),cell(loc,locFree),
-    cell(bind('fp',mkSel(FPS))),cell(bind('date',mkInp('','date'))),
-    cell(init,initFree),
-    cell(bind('plugMfr',mkSel(PLUGC))),cell(bind('plugInst',mkSel(PLUGI))),
-    cell(bind('doorDoc',mkSel(DDOC))),cell(bind('fsDoc',mkSel(FSDOC))),
-    cell(ta),cell(del)
+    cell('',num),cell('Fire Door Ref',ref),cell('Location',loc,locFree),
+    cell('Fire Resistance',bind('fp',mkSel(FPS))),cell('Completion Date',bind('date',mkInp('','date'))),
+    cell('Installed By',init,initFree),
+    cell('Q-Mark Mfr Plug',bind('plugMfr',mkSel(PLUGC))),cell('Installer Plug / Label',bind('plugInst',mkSel(PLUGI))),
+    cell('Door Supporting Doc',bind('doorDoc',mkSel(DDOC))),cell('Fire Stop Doc',bind('fsDoc',mkSel(FSDOC))),
+    cell('Comments',ta),cell('',del)
   );
   rows.set(id,{tr,f,num});
   return tr;
@@ -402,9 +339,20 @@ function applyDoorData(id,d){
   updateBadge(id);
 }
 
+// Next free FD-nn name: highest existing number + 1 (FD-01…FD-99, then FD-100 onwards).
+function nextDoorRef(){
+  let max=0;
+  rows.forEach(r=>{
+    const m=/^FD-(\d+)$/i.exec(r.f.ref.value.trim());
+    if(m)max=Math.max(max,parseInt(m[1],10));
+  });
+  const n=max+1;
+  return 'FD-'+(n<10?'0'+n:n);
+}
+
 async function addDoor(){
   try{
-    await addDoc(doorsCol,{...DOOR_DEFAULTS,order:Date.now(),updatedAt:serverTimestamp()});
+    await addDoc(doorsCol,{...DOOR_DEFAULTS,ref:nextDoorRef(),order:Date.now(),updatedAt:serverTimestamp()});
     touchJob();
   }catch(err){showToast('Could not add door: '+err.message,'error');}
 }
@@ -427,16 +375,27 @@ function renumber(){
     rows.get(tr.dataset.id).num.textContent=i+1;
   });
   [...photoGrid.children].forEach((card,i)=>{
-    photoCards.get(card.dataset.id).title.textContent=`Door ${i+1}`;
+    const p=photoCards.get(card.dataset.id);
+    p.index=i+1;
+    updateBadge(card.dataset.id);
   });
   $('doorEmpty').style.display=rows.size?'none':'block';
   $('photoEmpty').style.display=photoCards.size?'none':'block';
+  updateChips();
 }
 
 function updateBadge(id){
   const r=rows.get(id),p=photoCards.get(id);
   if(!r||!p)return;
-  p.badge.textContent=r.f.ref.value||'—';
+  const loc=r.f.loc.value!==LOCS[0]?r.f.loc.value:r.f.locFree.value;
+  p.title.textContent=r.f.ref.value.trim()||`Door ${p.index||''}`.trim();
+  p.badge.textContent=loc;
+}
+
+function updateChips(){
+  $('chipDoors').textContent=rows.size;
+  let n=0;photoCards.forEach(p=>n+=p.photos.length);
+  $('chipPhotos').textContent=n;
 }
 
 // ─── PHOTOS ───────────────────────────────────────────────────────────────────
@@ -493,7 +452,7 @@ function buildPhotoCard(id,index){
 
     slot.append(sh,thumbs,count,addBtn,picker);
     sw.appendChild(slot);
-    slots[key]={thumbs,count};
+    slots[key]={thumbs,count,el:slot};
   });
 
   card.appendChild(sw);
@@ -529,7 +488,10 @@ function renderThumbs(doorId){
       wrap.append(img,del);thumbs.appendChild(wrap);
     });
     count.textContent=list.length?`${list.length} photo${list.length>1?'s':''} attached`:'';
+    entry.slots[key].el.dataset.empty=list.length?'false':'true';
   });
+  entry.card.dataset.empty=entry.photos.length?'false':'true';
+  updateChips();
 }
 
 // Firestore documents are capped at 1 MiB, so shrink until the base64 string fits comfortably.
@@ -582,7 +544,24 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
 
 // ─── PRINT ────────────────────────────────────────────────────────────────────
 // The print stylesheet hides the form widgets and shows plain-text copies of their values.
+function fmtDate(v){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');
+  return m?`${m[3]}/${m[2]}/${m[1]}`:(v||'');
+}
 function preparePrint(){
+  cleanupPrint();
+  document.querySelectorAll('.card-body .field').forEach(f=>{
+    const c=f.querySelector('input,select,textarea');
+    if(!c)return;
+    const pv=document.createElement('div');
+    pv.className='print-val';
+    pv.textContent=(c.type==='date'?fmtDate(c.value):c.value)||'—';
+    f.appendChild(pv);
+  });
+  $('phRia').textContent=$('riaRef').value||'—';
+  $('phProj').textContent=$('projRef').value||'—';
+  $('phPrinted').textContent=new Date().toLocaleDateString('en-GB');
+  $('photosCard').classList.toggle('no-photos',![...photoCards.values()].some(p=>p.photos.length));
   document.querySelectorAll('#doorBody tr').forEach(tr=>{
     const sels=[...tr.querySelectorAll('select')];
     const inps=[...tr.querySelectorAll('input[type=text]')];
@@ -590,7 +569,7 @@ function preparePrint(){
     const num=tr.querySelector('.row-num')?.textContent||'';
     const loc=(sels[0]?.value||'')+(inps[1]?.value?'\n'+inps[1].value:'');
     const init=(sels[2]?.value||'')+(inps[2]?.value?' / '+inps[2].value:'');
-    const vals=[num,inps[0]?.value||'',loc,sels[1]?.value||'',date,init,
+    const vals=[num,inps[0]?.value||'',loc,sels[1]?.value||'',fmtDate(date),init,
       sels[3]?.value||'',sels[4]?.value||'',sels[5]?.value||'',sels[6]?.value||'',
       tr.querySelector('textarea')?.value||''];
     tr.querySelectorAll('td').forEach((td,i)=>{
@@ -629,6 +608,8 @@ function startListeners(){
     });
     const label=[d.riaRef,d.projRef].filter(Boolean).join(' — ');
     $('topbarJob').textContent=label||'Record of Installation Activities';
+    $('heroTitle').textContent=label||'New job';
+    $('heroAddr').textContent=d.siteAddress||'';
     document.title=label?`${label} — RIA`:'PML Fire Protection — RIA';
   },err=>{
     console.error(err);
