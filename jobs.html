@@ -116,12 +116,25 @@ function showToast(msg, type='success'){
   clearTimeout(tt); tt = setTimeout(()=> t.className = 'toast', 3200);
 }
 
+let fromCache = true;
+let slowConnect = false;
+setTimeout(()=>{ slowConnect = true; updateOnlineStatus(); if(fromCache) renderJobs(); }, 12000);
+
 function updateOnlineStatus(){
   const online = navigator.onLine;
-  statusBar.className = 'status-bar ' + (online ? 'online' : 'offline');
-  statusText.textContent = online
-    ? 'Online — jobs sync live across every device'
-    : 'Offline — you can still open and edit jobs; changes sync once you\'re back online';
+  let cls = 'online', msg = 'Online — jobs sync live across every device';
+  if(!online){
+    cls = 'offline';
+    msg = 'Offline — you can still open and edit jobs; changes sync once you\'re back online';
+  }else if(fromCache && slowConnect){
+    cls = 'offline';
+    msg = 'Can\'t reach the server — showing the copy saved on this device. Check your signal or wifi, and turn off any VPN, ad-blocker or Private Browsing.';
+  }else if(fromCache){
+    cls = 'offline';
+    msg = 'Connecting to the server…';
+  }
+  statusBar.className = 'status-bar ' + cls;
+  statusText.textContent = msg;
 }
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -180,7 +193,10 @@ function renderJobs(){
     `${jobs.length} job${jobs.length === 1 ? '' : 's'}` + (term ? ` · ${shown.length} match${shown.length === 1 ? '' : 'es'}` : '');
 
   if(!shown.length){
-    jobList.innerHTML = `<div class="empty-state">${jobs.length ? 'No jobs match your search.' : 'No jobs yet — tap "＋ New Job" to create the first one.'}</div>`;
+    const msg = jobs.length ? 'No jobs match your search.'
+      : fromCache ? (slowConnect ? 'Still can\'t reach the server, so jobs from other devices can\'t load yet.' : 'Connecting to the server…')
+      : 'No jobs yet — tap "＋ New Job" to create the first one.';
+    jobList.innerHTML = `<div class="empty-state">${msg}</div>`;
     return;
   }
   jobList.innerHTML = '';
@@ -191,7 +207,7 @@ function renderJobs(){
     row.innerHTML = `
       <div class="job-ref">${escapeHtml(j.riaRef || '(no ref)')}${j.projRef ? `<small>${escapeHtml(j.projRef)}</small>` : ''}</div>
       <div class="addr">${escapeHtml(j.siteAddress || '')}</div>
-      <div class="job-foot"><span class="meta">Updated ${updated}</span><span class="open-link">Open →</span></div>
+      <div class="job-foot"><span class="meta">${j.pending ? '⏳ Not uploaded yet — other devices can\'t see this' : 'Updated ' + updated}</span><span class="open-link">Open →</span></div>
     `;
     row.addEventListener('click', ()=> window.location.href = `ria.html?job=${j.id}`);
     jobList.appendChild(row);
@@ -200,11 +216,16 @@ function renderJobs(){
 searchBox.addEventListener('input', renderJobs);
 
 const q = query(collection(db, 'jobs'), orderBy('updatedAt', 'desc'));
-onSnapshot(q, snap=>{
-  jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+onSnapshot(q, { includeMetadataChanges: true }, snap=>{
+  jobs = snap.docs.map(d => ({ id: d.id, pending: d.metadata.hasPendingWrites, ...d.data() }));
+  fromCache = snap.metadata.fromCache;
+  updateOnlineStatus();
   renderJobs();
 }, err=>{
-  jobList.innerHTML = '<div class="empty-state">Could not load jobs. Check your connection and Firebase setup.</div>';
+  const denied = err.code === 'permission-denied';
+  jobList.innerHTML = `<div class="empty-state">${denied
+    ? 'This account isn\'t allowed to read jobs. Check the Firestore rules have been published (see README).'
+    : 'Could not load jobs: ' + escapeHtml(err.message)}</div>`;
   console.error(err);
 });
 
