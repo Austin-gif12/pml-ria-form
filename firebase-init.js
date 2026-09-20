@@ -11,7 +11,9 @@ setPersistence(auth, browserLocalPersistence);
 // IndexedDB copy first and sync to the server in the background whenever there's a connection.
 // Auto-detect long polling: some phone networks, VPNs and content blockers break Firestore's default
 // streaming connection, which shows up as jobs hanging on "Loading…". This falls back automatically.
+// The third argument is the Firestore database ID. This project's database is named "default"
+// (no brackets), not the standard "(default)", so it has to be named explicitly.
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   experimentalAutoDetectLongPolling: true
-});
+}, 'default');
