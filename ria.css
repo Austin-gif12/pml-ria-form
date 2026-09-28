@@ -24,6 +24,12 @@
 .row-num{width:28px;height:28px;background:var(--yellow);color:var(--black);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--ffh);font-size:11px;font-weight:800}
 .table-actions{padding:14px 0 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .remove-row{background:none;border:none;cursor:pointer;color:#b3261e;font-size:17px;padding:4px 7px;border-radius:8px;min-width:38px;min-height:38px;display:flex;align-items:center;justify-content:center}
+.collapse-btn{display:inline-flex;align-items:center;gap:5px;background:#f3f0e8;border:1px solid var(--border);color:var(--ink);font-family:var(--ffh);font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;min-height:38px;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.collapse-btn:hover{background:#eee9df}
+.collapse-btn .chev{font-size:10px}
+.door-panel.collapsed{margin-bottom:10px}
+.door-panel.collapsed .tabs,.door-panel.collapsed .panel{display:none!important}
+.door-panel.collapsed .dp-head{border-bottom:none}
 .remove-row:hover,.remove-row:active{background:var(--red-bg)}
 .empty-note{color:var(--muted);font-size:13px;text-align:center;padding:22px;border:1.5px dashed var(--border);border-radius:10px;margin-top:8px}
 

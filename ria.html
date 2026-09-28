@@ -119,7 +119,10 @@
   <div class="card">
     <div class="card-header">
       <h2>Fire Door Installation Entries</h2>
-      <button class="btn btn-ghost btn-sm" id="addDoorTop">＋ Add Door</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" id="collapseAllBtn">⊟ Minimise all</button>
+        <button class="btn btn-ghost btn-sm" id="addDoorTop">＋ Add Door</button>
+      </div>
     </div>
     <div class="card-body">
       <div class="no-print flow-note">
@@ -430,9 +433,11 @@ function buildDoor(id,index){
   const pillSurvey=document.createElement('span');pillSurvey.className='pill';
   const pillInstall=document.createElement('span');pillInstall.className='pill';
   chips.append(pillSurvey,pillInstall);
+  const collapseBtn=document.createElement('button');collapseBtn.type='button';collapseBtn.className='collapse-btn';
+  collapseBtn.addEventListener('click',()=>setCollapsed(id,!r.collapsed));
   const del=document.createElement('button');del.className='remove-row';del.textContent='✕';del.title='Remove this door';
   del.addEventListener('click',()=>removeDoor(id));
-  head.append(num,ref,locBox,chips,del);
+  head.append(num,ref,locBox,chips,collapseBtn,del);
 
   // tabs
   const tabs=document.createElement('div');tabs.className='tabs';
@@ -526,7 +531,8 @@ function buildDoor(id,index){
   pPhotos.append(psNote,psw);
 
   panel.append(head,tabs,pSurvey,pInstall,pPhotos);
-  Object.assign(r,{num,barFill:fill,progText,hdrCount,pillSurvey,pillInstall,dotSurvey:tSurvey.dot,dotInstall:tInstall.dot,dotPhotos:tPhotos.dot,tabs,lockNotice,lockNoticeText});
+  Object.assign(r,{num,barFill:fill,progText,hdrCount,pillSurvey,pillInstall,dotSurvey:tSurvey.dot,dotInstall:tInstall.dot,dotPhotos:tPhotos.dot,tabs,lockNotice,lockNoticeText,collapseBtn,collapsed:false});
+  setCollapsed(id,false,r);
   rows.set(id,r);
   doorList.insertBefore(panel,doorList.children[index]||null);
 
@@ -539,6 +545,24 @@ function buildDoor(id,index){
   });
   return r;
 }
+
+// Collapse state is a per-device screen preference, not saved data — it isn't written to Firestore.
+function setCollapsed(id,flag,rowOverride){
+  const r=rowOverride||rows.get(id);if(!r)return;
+  r.collapsed=flag;
+  r.panel.classList.toggle('collapsed',flag);
+  r.collapseBtn.innerHTML=flag?'<span class="chev">▸</span> Expand':'<span class="chev">▾</span> Minimise';
+  r.collapseBtn.title=flag?'Expand this door':'Minimise this door';
+  updateCollapseAllLabel();
+}
+function updateCollapseAllLabel(){
+  const anyExpanded=[...rows.values()].some(r=>!r.collapsed);
+  $('collapseAllBtn').textContent=anyExpanded?'⊟ Minimise all':'⊞ Expand all';
+}
+$('collapseAllBtn').addEventListener('click',()=>{
+  const anyExpanded=[...rows.values()].some(r=>!r.collapsed);
+  rows.forEach((r,id)=>setCollapsed(id,anyExpanded));
+});
 
 function showTab(id,key){
   const r=rows.get(id);if(!r)return;
@@ -603,6 +627,7 @@ function renumber(){
   [...doorList.children].forEach((p,i)=>{rows.get(p.dataset.id).num.textContent=i+1;});
   $('doorEmpty').style.display=rows.size?'none':'block';
   updateChips();
+  updateCollapseAllLabel();
 }
 
 function updateChips(){
